@@ -191,9 +191,12 @@ jobs:
             await page.locator('#next').click();
             const step2 = (await page.locator('#counter').innerText()).trim();
             if (step2 !== '2 / 10') throw new Error(`Tutorial next failed: ${step2}`);
+            await page.goto(`${base}/tutorial.html?demo=1`, {waitUntil:'networkidle'});
+            const persistedAfterNormalOpen = (await page.locator('#counter').innerText()).trim();
+            if (persistedAfterNormalOpen !== '2 / 10') throw new Error(`Tutorial persistence after normal open failed: ${persistedAfterNormalOpen}`);
             await page.reload({waitUntil:'networkidle'});
             const persisted = (await page.locator('#counter').innerText()).trim();
-            if (persisted !== '2 / 10') throw new Error(`Tutorial persistence failed: ${persisted}`);
+            if (persisted !== '2 / 10') throw new Error(`Tutorial persistence after normal reload failed: ${persisted}`);
             await page.keyboard.press('Escape');
             const closed = await page.locator('#card').evaluate(el => el.classList.contains('closed'));
             if (!closed) throw new Error('Tutorial Escape did not close card');
@@ -201,7 +204,7 @@ jobs:
             const resumedClosed = await page.locator('#card').evaluate(el => el.classList.contains('closed'));
             if (resumedClosed) throw new Error('Tutorial Resume did not reopen card');
             await page.screenshot({path:`${out}/screenshots/tutorial-1440-step2.png`,fullPage:true});
-            results.tutorial = {initial,step2,persisted,escapeClosed:closed,resumeReopened:!resumedClosed,nonGetRequests:nonGet};
+            results.tutorial = {initial,step2,persistedAfterNormalOpen,persisted,escapeClosed:closed,resumeReopened:!resumedClosed,nonGetRequests:nonGet};
             results.nonGetRequests.push(...nonGet);
             if (nonGet.length!==0) throw new Error(`Tutorial mutation requests detected: ${nonGet.join(', ')}`);
 

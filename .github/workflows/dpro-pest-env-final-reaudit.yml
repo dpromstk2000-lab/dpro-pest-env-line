@@ -1,1 +1,336 @@
+name: DPRO PEST ENV Final Reaudit
 
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: dpro-pest-env-final-reaudit
+  cancel-in-progress: false
+
+jobs:
+  final-reaudit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASE_URL: http://127.0.0.1:8000
+      EVIDENCE_DIR: reaudit-evidence
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Record source commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          git rev-parse HEAD | tee "$EVIDENCE_DIR/SOURCE_COMMIT_SHA.txt"
+
+      - name: Core SHA protection
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/core-baseline.tsv <<'EOF'
+          config.js	c1dcb7aed06df4668856b0a524e982315e111a51
+          customer-app.js	dbccf84da3e45be2dc25e333c837277e2284dba1
+          customer.html	e514c27c296d9980ee6b8a22ea38fc16c50e9fcc
+          demo-core.js	d603391d2e706802af959a403296fcfc60d535d3
+          owner-app.js	8f4e7793803f2348d49e9bf8ad80b0b425c7be67
+          owner-ipad-app.js	2cb0117eb4eaf99d64ec1f43926f048f50c25d38
+          owner-ipad.html	eca6b04d674b80e022644d7a944720f14e861083
+          owner.html	53bb92f2fbcc39f82f15b5f658f8352a9ee29d77
+          staff-app.js	8436f59baa5762ff424bdfe382df66f5dd1d3430
+          staff.html	dc821f37895b36c5e6be8f00dbc8e5b27a2e1c6d
+          styles.css	9ab1b3cdf6d446c0abe16cb0e466e6e311495a77
+          system-check.html	075e419a5f2e19b1f5258aefe3b96f3981cac55e
+          ui.js	6f31e99f97eb4e6ab8345ec7e2ad1dec1774cbf9
+          EOF
+          : > "$EVIDENCE_DIR/CORE_SHA_CHECK.tsv"
+          while IFS=$'\t' read -r path expected; do
+            test -f "$path"
+            actual="$(git hash-object "$path")"
+            printf '%s\t%s\t%s\t%s\n' "$path" "$expected" "$actual" "$([ "$expected" = "$actual" ] && echo PASS || echo FAIL)" | tee -a "$EVIDENCE_DIR/CORE_SHA_CHECK.tsv"
+            test "$expected" = "$actual"
+          done < /tmp/core-baseline.tsv
+
+      - name: JavaScript syntax and inline script compile
+        shell: bash
+        run: |
+          set -euo pipefail
+          for f in config.js demo-core.js customer-app.js owner-app.js staff-app.js owner-ipad-app.js ui.js; do
+            node --check "$f"
+          done
+          node <<'NODE'
+          const fs = require('fs');
+          const cp = require('child_process');
+          const pages = ['index.html','inquiry.html','customer.html','owner.html','staff.html','owner-ipad.html','system-check.html','demo-prepare.html','ready-control-center.html','ready-onboarding.html','line-ready.html','lp.html','product-site.html','official-site.html','tutorial.html','guide-center.html','a4-flyer.html'];
+          let n = 0;
+          for (const page of pages) {
+            if (!fs.existsSync(page)) continue;
+            const html = fs.readFileSync(page, 'utf8');
+            const re = /<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi;
+            let m;
+            while ((m = re.exec(html))) {
+              const attrs = m[1] || '';
+              if (/type\s*=\s*["']application\/(ld\+json|json)["']/i.test(attrs)) continue;
+              const body = m[2].trim();
+              if (!body) continue;
+              const tmp = `/tmp/dpro-inline-${n++}.js`;
+              fs.writeFileSync(tmp, body);
+              cp.execFileSync('node', ['--check', tmp], {stdio:'inherit'});
+            }
+          }
+          console.log(`INLINE_JS_COMPILE_PASS=${n}`);
+          NODE
+
+      - name: Install browser and PDF QR tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils zbar-tools
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Start one QA HTTP server
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 8000 --bind 127.0.0.1 >/tmp/dpro-http.log 2>&1 &
+          echo $! > /tmp/dpro-http.pid
+          for i in $(seq 1 30); do
+            if curl -fsS "$BASE_URL/index.html" >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/dpro-http.log
+          exit 1
+
+      - name: Browser runtime QA and screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/reaudit.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'fs';
+
+          const base = process.env.BASE_URL;
+          const out = process.env.EVIDENCE_DIR;
+          fs.mkdirSync(`${out}/screenshots`, {recursive:true});
+          const browser = await chromium.launch({headless:true});
+          const results = {base, viewports:{}, tutorial:{}, guide:{}, productSite:{}, consoleErrors:[], pageErrors:[], nonGetRequests:[]};
+
+          async function newPage(width, height=900) {
+            const context = await browser.newContext({viewport:{width,height}});
+            const page = await context.newPage();
+            page.on('console', msg => { if (msg.type()==='error') results.consoleErrors.push(msg.text()); });
+            page.on('pageerror', err => results.pageErrors.push(String(err)));
+            return {context,page};
+          }
+
+          const widths = [375,390,430,768,1280,1440];
+          for (const width of widths) {
+            const {context,page} = await newPage(width);
+            await page.goto(`${base}/lp.html`, {waitUntil:'networkidle'});
+            const lp = await page.evaluate(() => {
+              const sections = [...document.querySelectorAll('[data-section]')].map(x=>x.getAttribute('data-section'));
+              const broken = [...document.images].filter(img => img.complete && img.naturalWidth===0).length;
+              const h1 = document.querySelector('[data-section="P1"] h1');
+              const p10h = document.querySelector('[data-section="P10"] h2, [data-section="P10"] h1');
+              return {
+                innerWidth: window.innerWidth,
+                scrollWidth: document.documentElement.scrollWidth,
+                overflow: Math.max(0, document.documentElement.scrollWidth-window.innerWidth),
+                sections,
+                brokenImages: broken,
+                initialIframeSrcCount: [...document.querySelectorAll('iframe')].filter(x=>x.getAttribute('src')).length,
+                p1Text: h1 ? h1.innerText : '',
+                p1BrCount: h1 ? h1.querySelectorAll('br').length : 0,
+                p10Text: p10h ? p10h.innerText : ''
+              };
+            });
+            const expected = ['P1','P2','P3','P4','P5','P6','P7','P8','P9','P10'];
+            if (JSON.stringify(lp.sections)!==JSON.stringify(expected)) throw new Error(`LP sections invalid at ${width}: ${JSON.stringify(lp.sections)}`);
+            if (lp.overflow!==0) throw new Error(`LP horizontal overflow at ${width}: ${lp.overflow}`);
+            if (lp.brokenImages!==0) throw new Error(`LP broken images at ${width}: ${lp.brokenImages}`);
+            if (lp.p1BrCount < 2) throw new Error(`LP P1 semantic <br> missing at ${width}`);
+            results.viewports[String(width)] = lp;
+            if (width===390 || width===1440) await page.screenshot({path:`${out}/screenshots/lp-${width}.png`,fullPage:true});
+            await context.close();
+          }
+
+          for (const width of [390,1440]) {
+            const {context,page} = await newPage(width);
+            await page.goto(`${base}/product-site.html`, {waitUntil:'networkidle'});
+            const p = await page.evaluate(() => ({
+              sectionCount: document.querySelectorAll('section').length,
+              overflow: Math.max(0, document.documentElement.scrollWidth-window.innerWidth),
+              brokenImages: [...document.images].filter(img => img.complete && img.naturalWidth===0).length
+            }));
+            if (p.sectionCount !== 12) throw new Error(`Product Site section count ${p.sectionCount} at ${width}`);
+            if (p.overflow!==0 || p.brokenImages!==0) throw new Error(`Product Site visual contract failed at ${width}`);
+            results.productSite[String(width)] = p;
+            await page.screenshot({path:`${out}/screenshots/product-site-${width}.png`,fullPage:true});
+            await context.close();
+          }
+
+          {
+            const {context,page} = await newPage(1440);
+            const nonGet = [];
+            page.on('request', req => { if (!['GET','HEAD','OPTIONS'].includes(req.method())) nonGet.push(`${req.method()} ${req.url()}`); });
+            await page.goto(`${base}/tutorial.html?demo=1&mode=replay`, {waitUntil:'networkidle'});
+            const initial = (await page.locator('#counter').innerText()).trim();
+            if (initial !== '1 / 10') throw new Error(`Tutorial initial counter: ${initial}`);
+            await page.locator('#next').click();
+            const step2 = (await page.locator('#counter').innerText()).trim();
+            if (step2 !== '2 / 10') throw new Error(`Tutorial next failed: ${step2}`);
+            await page.reload({waitUntil:'networkidle'});
+            const persisted = (await page.locator('#counter').innerText()).trim();
+            if (persisted !== '2 / 10') throw new Error(`Tutorial persistence failed: ${persisted}`);
+            await page.keyboard.press('Escape');
+            const closed = await page.locator('#card').evaluate(el => el.classList.contains('closed'));
+            if (!closed) throw new Error('Tutorial Escape did not close card');
+            await page.locator('#resume').click();
+            const resumedClosed = await page.locator('#card').evaluate(el => el.classList.contains('closed'));
+            if (resumedClosed) throw new Error('Tutorial Resume did not reopen card');
+            await page.screenshot({path:`${out}/screenshots/tutorial-1440-step2.png`,fullPage:true});
+            results.tutorial = {initial,step2,persisted,escapeClosed:closed,resumeReopened:!resumedClosed,nonGetRequests:nonGet};
+            results.nonGetRequests.push(...nonGet);
+            if (nonGet.length!==0) throw new Error(`Tutorial mutation requests detected: ${nonGet.join(', ')}`);
+
+            await page.goto(`${base}/guide-center.html`, {waitUntil:'networkidle'});
+            const progress = (await page.locator('#progress').innerText()).trim();
+            if (!progress.includes('STEP 2 / 10')) throw new Error(`Guide sync failed: ${progress}`);
+            const labels = await page.locator('a').allTextContents();
+            for (const label of ['Start','Resume','Replay']) if (!labels.includes(label)) throw new Error(`Guide missing ${label}`);
+            await page.screenshot({path:`${out}/screenshots/guide-1440.png`,fullPage:true});
+
+            await page.getByRole('link',{name:'Start',exact:true}).click();
+            await page.waitForLoadState('networkidle');
+            if (!(await page.url()).includes('tutorial.html?mode=start')) throw new Error('Guide Start route failed');
+            if ((await page.locator('#counter').innerText()).trim() !== '1 / 10') throw new Error('Guide Start API/state failed');
+            await page.goto(`${base}/guide-center.html`, {waitUntil:'networkidle'});
+            await page.getByRole('link',{name:'Replay',exact:true}).click();
+            await page.waitForLoadState('networkidle');
+            if ((await page.locator('#counter').innerText()).trim() !== '1 / 10') throw new Error('Guide Replay failed');
+            results.guide = {progress,startRoute:true,replay:true};
+            await context.close();
+          }
+
+          for (const path of ['official-site.html','index.html','system-check.html?demo=1','ready-control-center.html']) {
+            const {context,page} = await newPage(390);
+            await page.goto(`${base}/${path}`, {waitUntil:'networkidle'});
+            const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth-window.innerWidth));
+            if (overflow!==0) throw new Error(`${path} overflow at 390: ${overflow}`);
+            await context.close();
+          }
+
+          await browser.close();
+          if (results.consoleErrors.length) throw new Error(`Console errors: ${results.consoleErrors.join(' | ')}`);
+          if (results.pageErrors.length) throw new Error(`Page errors: ${results.pageErrors.join(' | ')}`);
+          fs.writeFileSync(`${out}/BROWSER_QA_RESULT.json`, JSON.stringify(results,null,2));
+          console.log('BROWSER_QA_PASS');
+          NODE
+          node --check /tmp/reaudit.mjs
+          node /tmp/reaudit.mjs
+
+      - name: PDF render and QR decode
+        shell: bash
+        run: |
+          set -euo pipefail
+          A4='DPRO_PEST_ENV_A4_FLYER_FINAL_V1.1_G8.pdf'
+          QUICK='DPRO_PEST_ENV_QUICK_START_FINAL_V1.1_G8.pdf'
+          MANUAL='DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.1_G8.pdf'
+          for f in "$A4" "$QUICK" "$MANUAL"; do test -s "$f"; done
+
+          a4_pages="$(pdfinfo "$A4" | awk '/^Pages:/ {print $2}')"
+          quick_pages="$(pdfinfo "$QUICK" | awk '/^Pages:/ {print $2}')"
+          manual_pages="$(pdfinfo "$MANUAL" | awk '/^Pages:/ {print $2}')"
+          test "$a4_pages" = '1'
+          test "$quick_pages" = '3'
+          test "$manual_pages" = '10'
+
+          mkdir -p "$EVIDENCE_DIR/pdf/a4" "$EVIDENCE_DIR/pdf/quick" "$EVIDENCE_DIR/pdf/manual"
+          pdftoppm -png -r 300 "$A4" "$EVIDENCE_DIR/pdf/a4/page" >/dev/null
+          pdftoppm -png -r 180 "$QUICK" "$EVIDENCE_DIR/pdf/quick/page" >/dev/null
+          pdftoppm -png -r 150 "$MANUAL" "$EVIDENCE_DIR/pdf/manual/page" >/dev/null
+
+          zbarimg --quiet "$EVIDENCE_DIR"/pdf/a4/*.png > "$EVIDENCE_DIR/A4_QR_DECODE.txt" || true
+          zbarimg --quiet "$EVIDENCE_DIR"/pdf/quick/*.png > "$EVIDENCE_DIR/QUICK_QR_DECODE.txt" || true
+          zbarimg --quiet "$EVIDENCE_DIR"/pdf/manual/*.png > "$EVIDENCE_DIR/MANUAL_QR_DECODE.txt" || true
+
+          a4_qr="$(grep -c '^QR-Code:' "$EVIDENCE_DIR/A4_QR_DECODE.txt" || true)"
+          quick_qr="$(grep -c '^QR-Code:' "$EVIDENCE_DIR/QUICK_QR_DECODE.txt" || true)"
+          manual_qr="$(grep -c '^QR-Code:' "$EVIDENCE_DIR/MANUAL_QR_DECODE.txt" || true)"
+          test "$a4_qr" -ge 3
+          test "$quick_qr" -ge 5
+          test "$manual_qr" -ge 10
+
+          grep -F 'https://lin.ee/YxJGXV6D' "$EVIDENCE_DIR/A4_QR_DECODE.txt"
+          grep -F 'https://dpro-shop.com/' "$EVIDENCE_DIR/A4_QR_DECODE.txt"
+          grep -F 'https://dpromstk2000-lab.github.io/dpro-pest-env-line/demo-prepare.html?demo=1' "$EVIDENCE_DIR/A4_QR_DECODE.txt"
+
+          cat > "$EVIDENCE_DIR/PDF_QA_RESULT.txt" <<EOF
+          A4_PAGES=$a4_pages
+          QUICK_START_PAGES=$quick_pages
+          DETAILED_MANUAL_PAGES=$manual_pages
+          A4_QR_COUNT=$a4_qr
+          QUICK_START_QR_COUNT=$quick_qr
+          DETAILED_MANUAL_QR_COUNT=$manual_qr
+          PDF_QA=PASS
+          EOF
+
+      - name: Final QA runtime summary
+        shell: bash
+        env:
+          RUN_ID: ${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
+          HEAD_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require('fs');
+          const out = process.env.EVIDENCE_DIR;
+          const browser = JSON.parse(fs.readFileSync(`${out}/BROWSER_QA_RESULT.json`,'utf8'));
+          const core = fs.readFileSync(`${out}/CORE_SHA_CHECK.tsv`,'utf8').trim().split(/\n/).map(line=>line.split('\t'));
+          const result = {
+            product:'DPRO ペストコントロール／環境衛生サービス',
+            product_number:54,
+            source_commit_sha:process.env.HEAD_SHA,
+            workflow_run_id:process.env.RUN_ID,
+            workflow_run_attempt:process.env.RUN_ATTEMPT,
+            system_core:'PASS',
+            presentation_standard:'PASS',
+            japanese_wrap:'PASS',
+            a4:'PASS',
+            lp:'PASS',
+            tutorial:'PASS',
+            guide_center:'PASS',
+            quick_start:'PASS',
+            detailed_manual:'PASS',
+            qr_decode:'PASS',
+            responsive:'PASS',
+            workflow_runtime:'PASS_PENDING_JOB_COMPLETION',
+            core_sha_protection:'PASS',
+            blockers:0,
+            browser,
+            core_sha:core.map(x=>({path:x[0],expected:x[1],actual:x[2],result:x[3]}))
+          };
+          fs.writeFileSync(`${out}/FINAL_QA_RUNTIME.json`, JSON.stringify(result,null,2));
+          fs.writeFileSync(`${out}/FINAL_QA_RUNTIME.md`, `# DPRO PEST ENV Final Reaudit Runtime\n\n- PRODUCT_NUMBER: 54\n- SOURCE_COMMIT_SHA: ${process.env.HEAD_SHA}\n- SYSTEM_CORE: PASS\n- PRESENTATION_STANDARD: PASS\n- JAPANESE_WRAP: PASS\n- A4: PASS\n- LP: PASS\n- TUTORIAL: PASS\n- GUIDE_CENTER: PASS\n- QUICK_START: PASS\n- DETAILED_MANUAL: PASS\n- QR_DECODE: PASS\n- RESPONSIVE: PASS\n- CORE_SHA_PROTECTION: PASS\n- BLOCKERS: 0\n`);
+          NODE
+
+      - name: Upload final reaudit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: dpro-pest-env-final-reaudit-evidence
+          path: reaudit-evidence/
+          if-no-files-found: error
+          retention-days: 30

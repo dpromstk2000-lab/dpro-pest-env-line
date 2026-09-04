@@ -1,0 +1,102 @@
+name: DPRO PEST ENV Final Reaudit Bot Commit
+
+on:
+  workflow_run:
+    workflows: ["DPRO PEST ENV Final Reaudit"]
+    types: [completed]
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: dpro-pest-env-final-reaudit-bot-commit
+  cancel-in-progress: false
+
+jobs:
+  record-evidence:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+      SOURCE_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      TARGET_DIR: qa/final-reaudit
+    steps:
+      - name: Checkout main after successful main workflow
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download successful main-workflow evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: dpro-pest-env-final-reaudit-evidence
+          path: /tmp/dpro-final-reaudit-evidence
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Prepare bot evidence commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$TARGET_DIR"
+          mkdir -p "$TARGET_DIR"
+          cp -a /tmp/dpro-final-reaudit-evidence/. "$TARGET_DIR/"
+          cat > "$TARGET_DIR/BOT_COMMIT_SOURCE.txt" <<EOF
+          SOURCE_WORKFLOW_NAME=DPRO PEST ENV Final Reaudit
+          SOURCE_WORKFLOW_RUN_ID=$SOURCE_RUN_ID
+          SOURCE_HEAD_SHA=$SOURCE_HEAD_SHA
+          SOURCE_CONCLUSION=success
+          EOF
+
+          git add "$TARGET_DIR"
+          mapfile -t changed < <(git diff --cached --name-only)
+          test "${#changed[@]}" -gt 0
+          for path in "${changed[@]}"; do
+            case "$path" in
+              qa/final-reaudit/*) ;;
+              *) echo "OUT-OF-SCOPE CHANGE: $path" >&2; exit 1 ;;
+            esac
+          done
+          printf '%s\n' "${changed[@]}" > "$TARGET_DIR/CHANGED_FILE_SCOPE.txt"
+          git add "$TARGET_DIR/CHANGED_FILE_SCOPE.txt"
+
+      - name: Commit runtime evidence only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'dpro-factory-bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m "chore(qa): record DPRO PEST ENV final reaudit evidence"
+          git push origin HEAD:main
+          git rev-parse HEAD | tee /tmp/bot-commit-sha.txt
+
+      - name: Wait for Pages success on bot commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          bot_sha="$(cat /tmp/bot-commit-sha.txt)"
+          echo "BOT_COMMIT_SHA=$bot_sha"
+          for i in $(seq 1 72); do
+            json="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H "Authorization: Bearer $GH_TOKEN" -H 'X-GitHub-Api-Version: 2022-11-28' "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$bot_sha&per_page=100")"
+            row="$(printf '%s' "$json" | jq -r '[.workflow_runs[] | select((.name|ascii_downcase|contains("pages")) or (.path|ascii_downcase|contains("pages")))][0] | if . == null then "" else [.id,.status,(.conclusion//"pending"),.html_url] | @tsv end')"
+            if [ -n "$row" ]; then
+              IFS=$'\t' read -r run_id status conclusion html_url <<< "$row"
+              echo "Pages run $run_id status=$status conclusion=$conclusion $html_url"
+              if [ "$status" = 'completed' ] && [ "$conclusion" = 'success' ]; then
+                echo 'PAGES_AFTER_BOT_COMMIT=PASS'
+                exit 0
+              fi
+              if [ "$status" = 'completed' ] && [ "$conclusion" != 'success' ]; then
+                echo 'PAGES_AFTER_BOT_COMMIT=FAIL' >&2
+                exit 1
+              fi
+            fi
+            sleep 10
+          done
+          echo 'Timed out waiting for Pages on bot commit' >&2
+          exit 1

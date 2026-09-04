@@ -1,0 +1,15 @@
+HTTP/2 200 
+date: Fri, 04 Sep 2026 08:29:23 GMT
+content-type: application/json; charset=utf-8
+content-length: 540
+access-control-allow-origin: https://dpromstk2000-lab.github.io
+cache-control: no-store
+vary: Origin
+access-control-allow-headers: authorization, content-type
+access-control-allow-methods: GET,POST,PATCH,OPTIONS
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=baPncFYGCGi2rypk1RK3AfjJe%2Fjg1EHKhv56i5rVnn4TQHGkFifcd%2FgttuBSdNotVmIVwy0FFPSRrRCjFXUgT4ux3nEJhyeNEdnP8iwh93iCtjdsLi828npW3OwZLyhzUcVlr6WRD8lFvwfzBz%2Bt2YGseu6fW99bZqp3QNX2"}]}
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+server: cloudflare
+cf-ray: a35ba0433f2cdc5d-DFW
+alt-svc: h3=":443"; ma=86400
+

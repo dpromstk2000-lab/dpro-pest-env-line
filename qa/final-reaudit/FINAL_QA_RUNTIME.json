@@ -1,0 +1,272 @@
+{
+  "product": "DPRO ペストコントロール／環境衛生サービス",
+  "product_number": 54,
+  "source_commit_sha": "91efafb7444c16def0bc9575f0b5395bd18eafa9",
+  "workflow_run_id": "33853259525",
+  "workflow_run_attempt": "1",
+  "system_core": "PASS",
+  "presentation_standard": "PASS",
+  "japanese_wrap": "PASS",
+  "a4": "PASS",
+  "lp": "PASS",
+  "tutorial": "PASS",
+  "guide_center": "PASS",
+  "quick_start": "PASS",
+  "detailed_manual": "PASS",
+  "qr_decode": "PASS",
+  "responsive": "PASS",
+  "workflow_runtime": "PASS_PENDING_JOB_COMPLETION",
+  "core_sha_protection": "PASS",
+  "blockers": 0,
+  "browser": {
+    "base": "http://127.0.0.1:8000",
+    "viewports": {
+      "375": {
+        "innerWidth": 375,
+        "scrollWidth": 375,
+        "overflow": 0,
+        "sections": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P9",
+          "P10"
+        ],
+        "brokenImages": 0,
+        "initialIframeSrcCount": 0,
+        "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+        "p1BrCount": 2,
+        "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+      },
+      "390": {
+        "innerWidth": 390,
+        "scrollWidth": 390,
+        "overflow": 0,
+        "sections": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P9",
+          "P10"
+        ],
+        "brokenImages": 0,
+        "initialIframeSrcCount": 0,
+        "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+        "p1BrCount": 2,
+        "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+      },
+      "430": {
+        "innerWidth": 430,
+        "scrollWidth": 430,
+        "overflow": 0,
+        "sections": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P9",
+          "P10"
+        ],
+        "brokenImages": 0,
+        "initialIframeSrcCount": 0,
+        "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+        "p1BrCount": 2,
+        "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+      },
+      "768": {
+        "innerWidth": 768,
+        "scrollWidth": 768,
+        "overflow": 0,
+        "sections": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P9",
+          "P10"
+        ],
+        "brokenImages": 0,
+        "initialIframeSrcCount": 0,
+        "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+        "p1BrCount": 2,
+        "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+      },
+      "1280": {
+        "innerWidth": 1280,
+        "scrollWidth": 1280,
+        "overflow": 0,
+        "sections": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P9",
+          "P10"
+        ],
+        "brokenImages": 0,
+        "initialIframeSrcCount": 0,
+        "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+        "p1BrCount": 2,
+        "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+      },
+      "1440": {
+        "innerWidth": 1440,
+        "scrollWidth": 1440,
+        "overflow": 0,
+        "sections": [
+          "P1",
+          "P2",
+          "P3",
+          "P4",
+          "P5",
+          "P6",
+          "P7",
+          "P8",
+          "P9",
+          "P10"
+        ],
+        "brokenImages": 0,
+        "initialIframeSrcCount": 0,
+        "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+        "p1BrCount": 2,
+        "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+      }
+    },
+    "tutorial": {
+      "initial": "1 / 10",
+      "step2": "2 / 10",
+      "persistedAfterNormalOpen": "2 / 10",
+      "persisted": "2 / 10",
+      "escapeClosed": true,
+      "resumeReopened": true,
+      "nonGetRequests": []
+    },
+    "guide": {
+      "progress": "First10: 保存中: STEP 2 / 10",
+      "startRoute": true,
+      "replay": true
+    },
+    "productSite": {
+      "390": {
+        "sectionCount": 12,
+        "overflow": 0,
+        "brokenImages": 0
+      },
+      "1440": {
+        "sectionCount": 12,
+        "overflow": 0,
+        "brokenImages": 0
+      }
+    },
+    "consoleErrors": [],
+    "pageErrors": [],
+    "nonGetRequests": [],
+    "productionSystemCheck": {
+      "url": "https://dpromstk2000-lab.github.io/dpro-pest-env-line/system-check.html",
+      "ok": true,
+      "text": "PASS Production System Check OK\nschema=dpro_pest_env / schema_api_error=none / evidence_bucket=dpro-pest-env-evidence / storage_error=none / line_mode=off_safe\nPASS Environment\nPASS Supabase URL\nPASS Auth API key\nPASS Service role secret\nPASS 専用schema\nPASS Production tenant\nPASS CORS origin\nPASS Demo / Production Guard\nPASS LINE binding\nPASS LINE safe-off / contract-ready\nPASS Session auto-refresh contract\nPASS Custom schema Data API\nPASS Evidence Storage\nPASS Field Map / PIN contract"
+    }
+  },
+  "core_sha": [
+    {
+      "path": "config.js",
+      "expected": "c1dcb7aed06df4668856b0a524e982315e111a51",
+      "actual": "c1dcb7aed06df4668856b0a524e982315e111a51",
+      "result": "PASS"
+    },
+    {
+      "path": "customer-app.js",
+      "expected": "dbccf84da3e45be2dc25e333c837277e2284dba1",
+      "actual": "dbccf84da3e45be2dc25e333c837277e2284dba1",
+      "result": "PASS"
+    },
+    {
+      "path": "customer.html",
+      "expected": "e514c27c296d9980ee6b8a22ea38fc16c50e9fcc",
+      "actual": "e514c27c296d9980ee6b8a22ea38fc16c50e9fcc",
+      "result": "PASS"
+    },
+    {
+      "path": "demo-core.js",
+      "expected": "d603391d2e706802af959a403296fcfc60d535d3",
+      "actual": "d603391d2e706802af959a403296fcfc60d535d3",
+      "result": "PASS"
+    },
+    {
+      "path": "owner-app.js",
+      "expected": "8f4e7793803f2348d49e9bf8ad80b0b425c7be67",
+      "actual": "8f4e7793803f2348d49e9bf8ad80b0b425c7be67",
+      "result": "PASS"
+    },
+    {
+      "path": "owner-ipad-app.js",
+      "expected": "2cb0117eb4eaf99d64ec1f43926f048f50c25d38",
+      "actual": "2cb0117eb4eaf99d64ec1f43926f048f50c25d38",
+      "result": "PASS"
+    },
+    {
+      "path": "owner-ipad.html",
+      "expected": "eca6b04d674b80e022644d7a944720f14e861083",
+      "actual": "eca6b04d674b80e022644d7a944720f14e861083",
+      "result": "PASS"
+    },
+    {
+      "path": "owner.html",
+      "expected": "53bb92f2fbcc39f82f15b5f658f8352a9ee29d77",
+      "actual": "53bb92f2fbcc39f82f15b5f658f8352a9ee29d77",
+      "result": "PASS"
+    },
+    {
+      "path": "staff-app.js",
+      "expected": "8436f59baa5762ff424bdfe382df66f5dd1d3430",
+      "actual": "8436f59baa5762ff424bdfe382df66f5dd1d3430",
+      "result": "PASS"
+    },
+    {
+      "path": "staff.html",
+      "expected": "dc821f37895b36c5e6be8f00dbc8e5b27a2e1c6d",
+      "actual": "dc821f37895b36c5e6be8f00dbc8e5b27a2e1c6d",
+      "result": "PASS"
+    },
+    {
+      "path": "styles.css",
+      "expected": "9ab1b3cdf6d446c0abe16cb0e466e6e311495a77",
+      "actual": "9ab1b3cdf6d446c0abe16cb0e466e6e311495a77",
+      "result": "PASS"
+    },
+    {
+      "path": "system-check.html",
+      "expected": "075e419a5f2e19b1f5258aefe3b96f3981cac55e",
+      "actual": "075e419a5f2e19b1f5258aefe3b96f3981cac55e",
+      "result": "PASS"
+    },
+    {
+      "path": "ui.js",
+      "expected": "6f31e99f97eb4e6ab8345ec7e2ad1dec1774cbf9",
+      "actual": "6f31e99f97eb4e6ab8345ec7e2ad1dec1774cbf9",
+      "result": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{
+  "base": "http://127.0.0.1:8000",
+  "viewports": {
+    "375": {
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "overflow": 0,
+      "sections": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ],
+      "brokenImages": 0,
+      "initialIframeSrcCount": 0,
+      "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+      "p1BrCount": 2,
+      "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+    },
+    "390": {
+      "innerWidth": 390,
+      "scrollWidth": 390,
+      "overflow": 0,
+      "sections": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ],
+      "brokenImages": 0,
+      "initialIframeSrcCount": 0,
+      "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+      "p1BrCount": 2,
+      "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+    },
+    "430": {
+      "innerWidth": 430,
+      "scrollWidth": 430,
+      "overflow": 0,
+      "sections": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ],
+      "brokenImages": 0,
+      "initialIframeSrcCount": 0,
+      "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+      "p1BrCount": 2,
+      "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+    },
+    "768": {
+      "innerWidth": 768,
+      "scrollWidth": 768,
+      "overflow": 0,
+      "sections": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ],
+      "brokenImages": 0,
+      "initialIframeSrcCount": 0,
+      "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+      "p1BrCount": 2,
+      "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+    },
+    "1280": {
+      "innerWidth": 1280,
+      "scrollWidth": 1280,
+      "overflow": 0,
+      "sections": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ],
+      "brokenImages": 0,
+      "initialIframeSrcCount": 0,
+      "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+      "p1BrCount": 2,
+      "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+    },
+    "1440": {
+      "innerWidth": 1440,
+      "scrollWidth": 1440,
+      "overflow": 0,
+      "sections": [
+        "P1",
+        "P2",
+        "P3",
+        "P4",
+        "P5",
+        "P6",
+        "P7",
+        "P8",
+        "P9",
+        "P10"
+      ],
+      "brokenImages": 0,
+      "initialIframeSrcCount": 0,
+      "p1Text": "相談写真から、\n調査・施工・報告、\n次回点検まで。",
+      "p1BrCount": 2,
+      "p10Text": "今の受付・現場・報告の流れを、まず聞かせてください。"
+    }
+  },
+  "tutorial": {
+    "initial": "1 / 10",
+    "step2": "2 / 10",
+    "persistedAfterNormalOpen": "2 / 10",
+    "persisted": "2 / 10",
+    "escapeClosed": true,
+    "resumeReopened": true,
+    "nonGetRequests": []
+  },
+  "guide": {
+    "progress": "First10: 保存中: STEP 2 / 10",
+    "startRoute": true,
+    "replay": true
+  },
+  "productSite": {
+    "390": {
+      "sectionCount": 12,
+      "overflow": 0,
+      "brokenImages": 0
+    },
+    "1440": {
+      "sectionCount": 12,
+      "overflow": 0,
+      "brokenImages": 0
+    }
+  },
+  "consoleErrors": [],
+  "pageErrors": [],
+  "nonGetRequests": [],
+  "productionSystemCheck": {
+    "url": "https://dpromstk2000-lab.github.io/dpro-pest-env-line/system-check.html",
+    "ok": true,
+    "text": "PASS Production System Check OK\nschema=dpro_pest_env / schema_api_error=none / evidence_bucket=dpro-pest-env-evidence / storage_error=none / line_mode=off_safe\nPASS Environment\nPASS Supabase URL\nPASS Auth API key\nPASS Service role secret\nPASS 専用schema\nPASS Production tenant\nPASS CORS origin\nPASS Demo / Production Guard\nPASS LINE binding\nPASS LINE safe-off / contract-ready\nPASS Session auto-refresh contract\nPASS Custom schema Data API\nPASS Evidence Storage\nPASS Field Map / PIN contract"
+  }
+}

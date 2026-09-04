@@ -117,7 +117,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cat > /tmp/reaudit.mjs <<'NODE'
+          cat > .dpro-final-reaudit.mjs <<'NODE'
           import { chromium } from 'playwright';
           import fs from 'fs';
 
@@ -238,8 +238,9 @@ jobs:
           fs.writeFileSync(`${out}/BROWSER_QA_RESULT.json`, JSON.stringify(results,null,2));
           console.log('BROWSER_QA_PASS');
           NODE
-          node --check /tmp/reaudit.mjs
-          node /tmp/reaudit.mjs
+          node --check .dpro-final-reaudit.mjs
+          node .dpro-final-reaudit.mjs
+          rm -f .dpro-final-reaudit.mjs
 
       - name: PDF render and QR decode
         shell: bash

@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   actions: read
+  pages: write
 
 concurrency:
   group: dpro-pest-env-final-reaudit-bot-commit
@@ -73,7 +74,7 @@ jobs:
           git push origin HEAD:main
           git rev-parse HEAD | tee /tmp/bot-commit-sha.txt
 
-      - name: Wait for Pages success on bot commit
+      - name: Request Pages build for bot commit
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,22 +82,40 @@ jobs:
           set -euo pipefail
           bot_sha="$(cat /tmp/bot-commit-sha.txt)"
           echo "BOT_COMMIT_SHA=$bot_sha"
+          curl -fsSL -X POST \
+            -H 'Accept: application/vnd.github+json' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'X-GitHub-Api-Version: 2026-03-10' \
+            "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pages/builds" \
+            | tee /tmp/pages-build-request.json
+
+      - name: Wait for Pages success on bot commit
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          bot_sha="$(cat /tmp/bot-commit-sha.txt)"
           for i in $(seq 1 72); do
-            json="$(curl -fsSL -H 'Accept: application/vnd.github+json' -H "Authorization: Bearer $GH_TOKEN" -H 'X-GitHub-Api-Version: 2022-11-28' "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/actions/runs?head_sha=$bot_sha&per_page=100")"
-            row="$(printf '%s' "$json" | jq -r '[.workflow_runs[] | select((.name|ascii_downcase|contains("pages")) or (.path|ascii_downcase|contains("pages")))][0] | if . == null then "" else [.id,.status,(.conclusion//"pending"),.html_url] | @tsv end')"
-            if [ -n "$row" ]; then
-              IFS=$'\t' read -r run_id status conclusion html_url <<< "$row"
-              echo "Pages run $run_id status=$status conclusion=$conclusion $html_url"
-              if [ "$status" = 'completed' ] && [ "$conclusion" = 'success' ]; then
-                echo 'PAGES_AFTER_BOT_COMMIT=PASS'
-                exit 0
-              fi
-              if [ "$status" = 'completed' ] && [ "$conclusion" != 'success' ]; then
-                echo 'PAGES_AFTER_BOT_COMMIT=FAIL' >&2
-                exit 1
-              fi
+            json="$(curl -fsSL \
+              -H 'Accept: application/vnd.github+json' \
+              -H "Authorization: Bearer $GH_TOKEN" \
+              -H 'X-GitHub-Api-Version: 2026-03-10' \
+              "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pages/builds/latest")"
+            commit="$(printf '%s' "$json" | jq -r '.commit // ""')"
+            status="$(printf '%s' "$json" | jq -r '.status // ""')"
+            url="$(printf '%s' "$json" | jq -r '.url // ""')"
+            echo "Pages build commit=$commit status=$status $url"
+            if [ "$commit" = "$bot_sha" ] && [ "$status" = 'built' ]; then
+              printf '%s' "$json" > /tmp/pages-build-success.json
+              echo 'PAGES_AFTER_BOT_COMMIT=PASS'
+              exit 0
+            fi
+            if [ "$commit" = "$bot_sha" ] && [ "$status" = 'errored' ]; then
+              echo 'PAGES_AFTER_BOT_COMMIT=FAIL' >&2
+              exit 1
             fi
             sleep 10
           done
-          echo 'Timed out waiting for Pages on bot commit' >&2
+          echo 'Timed out waiting for Pages build on bot commit' >&2
           exit 1

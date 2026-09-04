@@ -18,6 +18,8 @@ jobs:
     env:
       BASE_URL: http://127.0.0.1:8000
       EVIDENCE_DIR: reaudit-evidence
+      PROD_ORIGIN: https://dpromstk2000-lab.github.io
+      PROD_CHECK_URL: https://dpro-pest-env-core.dpromstk2000.workers.dev/api/pest/v1/system-check
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
@@ -229,9 +231,36 @@ jobs:
 
           for (const path of ['official-site.html','index.html','system-check.html?demo=1','ready-control-center.html']) {
             const {context,page} = await newPage(390);
+            // ready-control-center always performs a Production system-check fetch.
+            // For LOCAL layout QA only, fulfill that request locally; the real Production
+            // CORS/API contract is verified separately against the public origin below.
+            if (path === 'ready-control-center.html') {
+              await page.route('**/api/pest/v1/system-check', route => route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({ok:true})
+              }));
+            }
             await page.goto(`${base}/${path}`, {waitUntil:'networkidle'});
             const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth-window.innerWidth));
             if (overflow!==0) throw new Error(`${path} overflow at 390: ${overflow}`);
+            await context.close();
+          }
+
+          {
+            const {context,page} = await newPage(390);
+            const live = 'https://dpromstk2000-lab.github.io/dpro-pest-env-line/system-check.html';
+            await page.goto(live, {waitUntil:'networkidle'});
+            await page.waitForFunction(() => {
+              const t = document.querySelector('#results')?.innerText || '';
+              return t.includes('Production System Check OK') || t.includes('Production System Check BLOCK') || t.includes('Production System Check ERROR');
+            }, null, {timeout:30000});
+            const text = (await page.locator('#results').innerText()).trim();
+            if (!text.includes('Production System Check OK')) throw new Error(`Public Production System Check failed: ${text}`);
+            const overflow = await page.evaluate(() => Math.max(0, document.documentElement.scrollWidth-window.innerWidth));
+            if (overflow!==0) throw new Error(`Public system-check overflow at 390: ${overflow}`);
+            results.productionSystemCheck = {url:live, ok:true, text};
+            await page.screenshot({path:`${out}/screenshots/system-check-public-390.png`,fullPage:true});
             await context.close();
           }
 
@@ -244,6 +273,30 @@ jobs:
           node --check .dpro-final-reaudit.mjs
           node .dpro-final-reaudit.mjs
           rm -f .dpro-final-reaudit.mjs
+
+      - name: Production Worker CORS and System Check contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$EVIDENCE_DIR"
+          curl -fsS -D /tmp/pest-system-check-headers.txt \
+            -H "Origin: $PROD_ORIGIN" \
+            -H 'Accept: application/json' \
+            "$PROD_CHECK_URL" \
+            -o "$EVIDENCE_DIR/PRODUCTION_SYSTEM_CHECK.json"
+          tr -d '\r' < /tmp/pest-system-check-headers.txt > "$EVIDENCE_DIR/PRODUCTION_SYSTEM_CHECK_HEADERS.txt"
+          acao="$(awk 'BEGIN{IGNORECASE=1} /^access-control-allow-origin:/ {sub(/^[^:]+:[[:space:]]*/,""); print; exit}' "$EVIDENCE_DIR/PRODUCTION_SYSTEM_CHECK_HEADERS.txt")"
+          test "$acao" = "$PROD_ORIGIN"
+          node <<'NODE'
+          const fs = require('fs');
+          const j = JSON.parse(fs.readFileSync(process.env.EVIDENCE_DIR + '/PRODUCTION_SYSTEM_CHECK.json','utf8'));
+          if (j.ok !== true) throw new Error('Production system-check ok != true');
+          const entries = Object.entries(j.checks || {});
+          if (!entries.length) throw new Error('Production system-check checks missing');
+          const failed = entries.filter(([,v]) => v !== true);
+          if (failed.length) throw new Error('Production system-check failed checks: ' + failed.map(([k])=>k).join(','));
+          console.log('PRODUCTION_SYSTEM_CHECK_CONTRACT_PASS=' + entries.length);
+          NODE
 
       - name: PDF render and QR decode
         shell: bash

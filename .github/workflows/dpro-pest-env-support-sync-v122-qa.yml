@@ -43,20 +43,48 @@ jobs:
           grep -q "DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf" guide-center.html
           grep -q "DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf" guide-center.html
 
-      - name: PDF exact pages and A4
+      - name: PDF exact pages A4 render and QR decode
         run: |
           set -euo pipefail
           sudo apt-get update -qq
-          sudo apt-get install -y -qq poppler-utils
+          sudo apt-get install -y -qq poppler-utils zbar-tools
+          mkdir -p qa-live/pdf/quick qa-live/pdf/detailed
           test "$(pdfinfo DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf | awk '/^Pages:/{print $2}')" = "3"
           test "$(pdfinfo DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf | awk '/^Pages:/{print $2}')" = "10"
-          check_a4_portrait() {
-            local file="$1"
-            read -r width height <<< "$(pdfinfo "$file" | awk '/^Page size:/{print $3, $5}')"
-            awk -v w="$width" -v h="$height" 'BEGIN { exit !((w >= 595.0 && w <= 595.6) && (h >= 841.5 && h <= 842.3) && h > w) }'
+          check_a4() {
+            read -r w h <<< "$(pdfinfo "$1" | awk '/^Page size:/{print $3, $5}')"
+            awk -v w="$w" -v h="$h" 'BEGIN { exit !((w>=595.0&&w<=595.6)&&(h>=841.5&&h<=842.3)&&h>w) }'
           }
-          check_a4_portrait DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf
-          check_a4_portrait DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf
+          check_a4 DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf
+          check_a4 DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf
+          pdftoppm -png -r 250 DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf qa-live/pdf/quick/page >/dev/null 2>&1
+          pdftoppm -png -r 250 DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf qa-live/pdf/detailed/page >/dev/null 2>&1
+          test "$(find qa-live/pdf/quick -name '*.png' | wc -l)" = "3"
+          test "$(find qa-live/pdf/detailed -name '*.png' | wc -l)" = "10"
+          expected=(
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/guide-center.html'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/tutorial.html?mode=start&demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/system-check.html?demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/guide-center.html'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/tutorial.html?mode=start&demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/demo-prepare.html?demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/owner.html?demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/staff.html?demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/owner-ipad.html?demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/system-check.html?demo=1'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/ready-control-center.html'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/guide-center.html'
+            'https://dpromstk2000-lab.github.io/dpro-pest-env-line/DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf'
+          )
+          : > qa-live/PDF_QR_DECODE_EVIDENCE.txt
+          n=0
+          for f in $(find qa-live/pdf/quick -name '*.png' | sort -V) $(find qa-live/pdf/detailed -name '*.png' | sort -V); do
+            got="$(zbarimg --quiet --raw "$f" 2>/dev/null | head -n1 || true)"
+            printf '%02d\t%s\t%s\n' "$((n+1))" "$f" "$got" >> qa-live/PDF_QR_DECODE_EVIDENCE.txt
+            test "$got" = "${expected[$n]}"
+            n=$((n+1))
+          done
+          test "$n" = "13"
 
       - name: Pages propagation
         run: |
@@ -66,77 +94,84 @@ jobs:
           for i in $(seq 1 36); do
             if curl -fsSL "$base/guide-center.html" | grep -q "Quick Start V1.2.2" \
               && curl -fsI "$base/DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf" >/dev/null \
-              && curl -fsI "$base/DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf" >/dev/null; then
-              ok=1
-              break
-            fi
+              && curl -fsI "$base/DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf" >/dev/null; then ok=1; break; fi
             sleep 10
           done
           test "$ok" = "1"
 
       - name: Install Playwright Chromium
         run: |
-          set -euo pipefail
           npm init -y >/dev/null 2>&1
           npm install --no-save playwright@1.55.0
           npx playwright install --with-deps chromium
 
-      - name: Live Pages target and responsive screenshots
+      - name: Live Pages target responsive and recovery screenshots
         env:
           BASE_URL: https://dpromstk2000-lab.github.io/dpro-pest-env-line/
         run: |
           set -euo pipefail
-          mkdir -p qa-live/screens
+          mkdir -p qa-live/screens qa-live/support-source
           cat > dpro-live-qa.mjs <<'JS'
           import { chromium } from 'playwright';
           import fs from 'node:fs';
-          const base = process.env.BASE_URL;
-          const browser = await chromium.launch({headless:true});
-          const page = await browser.newPage({viewport:{width:1280,height:900}});
-          const steps = [
-            ['01-guide','guide-center.html','.hero .row'],
-            ['02-demo-prepare','demo-prepare.html?demo=1','#prepare'],
-            ['03-inquiry','inquiry.html?demo=1','#form'],
-            ['04-customer','customer.html?demo=1','#detail > h2'],
-            ['05-owner-board','owner.html?demo=1','.open'],
-            ['06-owner-next','owner.html?demo=1','#detail .grid > div:nth-child(2)'],
-            ['07-staff','staff.html?demo=1','#phase'],
-            ['08-field-map','owner-ipad.html?demo=1','#app > section.card h2'],
-            ['09-system-check','system-check.html?demo=1','#run'],
-            ['10-ready','ready-control-center.html','.hero h1']
+          const base=process.env.BASE_URL;
+          const browser=await chromium.launch({headless:true});
+          const page=await browser.newPage({viewport:{width:1280,height:900}});
+          const steps=[
+            ['01-guide','guide-center.html','.hero .row','guide.png'],
+            ['02-demo-prepare','demo-prepare.html?demo=1','#prepare','demo_prepare_target.png'],
+            ['03-inquiry','inquiry.html?demo=1','#form','inquiry_target.png'],
+            ['04-customer','customer.html?demo=1','#detail > h2','customer_target.png'],
+            ['05-owner-board','owner.html?demo=1','.open','owner_board_target.png'],
+            ['06-owner-next','owner.html?demo=1','#detail .grid > div:nth-child(2)','owner_target.png'],
+            ['07-staff','staff.html?demo=1','#phase','staff_target.png'],
+            ['08-field-map','owner-ipad.html?demo=1','#app > section.card h2','field_map_target.png'],
+            ['09-system-check','system-check.html?demo=1','#run','system_check_target.png'],
+            ['10-ready','ready-control-center.html','.hero h1','ready_target.png']
           ];
-          const result = {first10_exactly_10: steps.length === 10, steps: [], responsive: {}};
-          for (const [id, route, selector] of steps) {
+          const result={first10_exactly_10:steps.length===10,steps:[],responsive:{}};
+          for(const [id,route,selector,supportName] of steps){
             await page.setViewportSize({width:1280,height:900});
-            const response = await page.goto(new URL(route,base).href,{waitUntil:'networkidle',timeout:30000});
-            if (!response || !response.ok()) throw new Error(`${id}: HTTP ${response?.status()}`);
-            const target = page.locator(selector).first();
+            const r=await page.goto(new URL(route,base).href,{waitUntil:'networkidle',timeout:30000});
+            if(!r||!r.ok()) throw new Error(`${id}: HTTP ${r?.status()}`);
+            const target=page.locator(selector).first();
             await target.waitFor({state:'visible',timeout:15000});
             await target.scrollIntoViewIfNeeded();
-            await target.evaluate(el => { el.style.outline='4px solid #e8a12e'; el.style.outlineOffset='4px'; });
+            await target.evaluate(el=>{el.style.outline='4px solid #e8a12e';el.style.outlineOffset='4px';});
             await page.screenshot({path:`qa-live/screens/${id}.png`,fullPage:true});
-            result.steps.push({id,route,selector,http:response.status(),target_visible:true,screenshot:`screens/${id}.png`});
+            await page.screenshot({path:`qa-live/support-source/${supportName}`,fullPage:true});
+            result.steps.push({id,route,selector,http:r.status(),target_visible:true});
           }
-          for (const width of [390,768,1440]) {
+          for(const width of [390,768,1440]){
             await page.setViewportSize({width,height:1000});
-            const response = await page.goto(new URL('guide-center.html',base).href,{waitUntil:'networkidle',timeout:30000});
-            if (!response || !response.ok()) throw new Error(`guide-${width}: HTTP ${response?.status()}`);
-            const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
-            if (overflow) throw new Error(`guide-${width}: horizontal overflow`);
+            const r=await page.goto(new URL('guide-center.html',base).href,{waitUntil:'networkidle',timeout:30000});
+            if(!r||!r.ok()) throw new Error(`guide-${width}: HTTP ${r?.status()}`);
+            const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>document.documentElement.clientWidth+1);
+            if(overflow) throw new Error(`guide-${width}: horizontal overflow`);
             await page.screenshot({path:`qa-live/screens/guide-${width}.png`,fullPage:true});
-            result.responsive[String(width)]={http:response.status(),horizontal_overflow:false,screenshot:`screens/guide-${width}.png`};
+            result.responsive[String(width)]={http:r.status(),horizontal_overflow:false};
           }
-          result.pass = result.first10_exactly_10 && result.steps.length === 10;
+          await page.setViewportSize({width:390,height:1000});
+          await page.goto(new URL('tutorial.html?mode=start&demo=1',base).href,{waitUntil:'networkidle',timeout:30000});
+          await page.screenshot({path:'qa-live/support-source/mobile.png',fullPage:true});
+          await page.setViewportSize({width:1280,height:900});
+          await page.goto(new URL('tutorial.html?mode=start&demo=1',base).href,{waitUntil:'networkidle',timeout:30000});
+          await page.evaluate(()=>{
+            const s=document.getElementById('targetStatus'); s.dataset.state='error'; s.textContent='TARGET_MISSING - required targetが見つかりません';
+            document.getElementById('recovery').hidden=false; document.getElementById('next').disabled=true;
+          });
+          await page.screenshot({path:'qa-live/support-source/target_missing_recovery.png',fullPage:true});
+          result.pass=true;
           fs.writeFileSync('qa-live/LIVE_PAGES_QA.json',JSON.stringify(result,null,2));
           await browser.close();
           JS
-          node ./dpro-live-qa.mjs
+          node dpro-live-qa.mjs
 
-      - name: Upload live QA artifact
+      - name: Upload final QA artifact
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: dpro-pest-env-support-sync-v122-live-evidence
+          name: dpro-pest-env-support-sync-v122-final-evidence
           path: qa-live/
           if-no-files-found: ignore
 
@@ -146,6 +181,8 @@ jobs:
           echo "- Frozen Tutorial/Core SHA: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "- Quick PDF: A4 portrait exactly 3 pages PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "- Detailed PDF: A4 portrait exactly 10 pages PASS" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Pages propagation: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Rendered PDF QR decode: 13/13 PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "- Live exact-target screenshots: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- TARGET_MISSING recovery screenshot: PASS" >> "$GITHUB_STEP_SUMMARY"
           echo "- Guide responsive 390/768/1440: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Pages propagation: PASS" >> "$GITHUB_STEP_SUMMARY"

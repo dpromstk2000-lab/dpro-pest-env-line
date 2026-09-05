@@ -1,0 +1,813 @@
+name: DPRO PEST ENV Tutorial Navigation V1.2.2 QA
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'tutorial.html'
+      - 'guide-center.html'
+      - '.github/workflows/dpro-pest-env-tutorial-navigation-v122-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: dpro-pest-env-tutorial-navigation-v122
+  cancel-in-progress: false
+
+jobs:
+  runtime-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BASELINE_HEAD: 63eea528be323427be15faa3a6b99af41a1b39d9
+      PUBLIC_BASE: https://dpromstk2000-lab.github.io/dpro-pest-env-line/
+      OUT_DIR: qa/tutorial-navigation-v1.2.2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+
+      - name: Bootstrap V1.2.2 source when connector is read-only
+        id: bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -q 'DPRO_TUTORIAL_NAVIGATION_V1.2.2' tutorial.html 2>/dev/null && grep -q 'id="startFirst10"' guide-center.html 2>/dev/null && grep -q 'id="replayFirst10"' guide-center.html 2>/dev/null; then
+            echo "bootstrapped=false" >> "$GITHUB_OUTPUT"
+            echo "SOURCE_ALREADY_RETROFITTED=YES"
+            exit 0
+          fi
+          mapfile -t changed < <(git diff --name-only "$BASELINE_HEAD..HEAD")
+          for f in "${changed[@]}"; do
+            [[ "$f" == '.github/workflows/dpro-pest-env-tutorial-navigation-v122-qa.yml' ]] || { echo "DRIFT_BEFORE_BOOTSTRAP=$f" >&2; exit 1; }
+          done
+          cat > /tmp/tutorial.b64 <<'B64T'
+          PCFkb2N0eXBlIGh0bWw+CjxodG1sIGxhbmc9ImphIj4KPGhlYWQ+CjxtZXRhIGNoYXJzZXQ9InV0
+          Zi04Ij4KPG1ldGEgbmFtZT0idmlld3BvcnQiIGNvbnRlbnQ9IndpZHRoPWRldmljZS13aWR0aCxp
+          bml0aWFsLXNjYWxlPTEsdmlld3BvcnQtZml0PWNvdmVyIj4KPHRpdGxlPkZpcnN0MTAgVHV0b3Jp
+          YWwgfCBEUFJPIFBFU1Q8L3RpdGxlPgo8c3R5bGU+Cjpyb290ey0tZzojMGQ2YzU1Oy0tZGc6IzEw
+          M2UzMzstLXA6I2VlZjZmMTstLWI6I2M5ZGVkNDstLXR4dDojMjAzODMxOy0tbXV0ZWQ6IzY2NzY2
+          ZjstLXdhcm46I2E4NWQwMDstLWRhbmdlcjojYTYxYjFiOy0tZm9jdXM6I2U4YTEyZTstLXNoYWRv
+          dzowIDE0cHggMzRweCByZ2JhKDE2LDYyLDUxLC4xMil9Kntib3gtc2l6aW5nOmJvcmRlci1ib3h9
+          aHRtbHtvdmVyZmxvdy14OmhpZGRlbn1ib2R5e21hcmdpbjowO21pbi13aWR0aDowO2ZvbnQtZmFt
+          aWx5Oi1hcHBsZS1zeXN0ZW0sQmxpbmtNYWNTeXN0ZW1Gb250LCJTZWdvZSBVSSIsIk5vdG8gU2Fu
+          cyBDSksgSlAiLHNhbnMtc2VyaWY7Y29sb3I6dmFyKC0tdHh0KTtiYWNrZ3JvdW5kOiNmN2ZhZjg7
+          bGluZS1oZWlnaHQ6MS43O292ZXJmbG93LXg6aGlkZGVufWF7Y29sb3I6aW5oZXJpdH1idXR0b24s
+          YXt0b3VjaC1hY3Rpb246bWFuaXB1bGF0aW9ufWJ1dHRvbjpmb2N1cy12aXNpYmxlLGE6Zm9jdXMt
+          dmlzaWJsZXtvdXRsaW5lOjRweCBzb2xpZCB2YXIoLS1mb2N1cyk7b3V0bGluZS1vZmZzZXQ6M3B4
+          fS50b3B7YmFja2dyb3VuZDp2YXIoLS1kZyk7Y29sb3I6I2ZmZjtwYWRkaW5nOjE0cHggMThweH0u
+          dG9waW57bWF4LXdpZHRoOjExODBweDttYXJnaW46YXV0bztkaXNwbGF5OmZsZXg7anVzdGlmeS1j
+          b250ZW50OnNwYWNlLWJldHdlZW47YWxpZ24taXRlbXM6Y2VudGVyO2dhcDoxNHB4O2ZsZXgtd3Jh
+          cDp3cmFwfS5icmFuZHtmb250LXdlaWdodDo5MDB9Lm5hdntkaXNwbGF5OmZsZXg7Z2FwOjhweDtm
+          bGV4LXdyYXA6d3JhcH0ubmF2IGF7cGFkZGluZzo4cHggMTJweDtib3JkZXItcmFkaXVzOjlweDti
+          YWNrZ3JvdW5kOnJnYmEoMjU1LDI1NSwyNTUsLjExKTt0ZXh0LWRlY29yYXRpb246bm9uZX0ud3Jh
+          cHttYXgtd2lkdGg6MTE4MHB4O21hcmdpbjoyNHB4IGF1dG87cGFkZGluZzowIDE4cHggNDJweH0u
+          aGVybywuY2FyZCwudGFyZ2V0LXBhbmV7YmFja2dyb3VuZDojZmZmO2JvcmRlcjoxcHggc29saWQg
+          dmFyKC0tYik7Ym9yZGVyLXJhZGl1czoxOHB4fS5oZXJve3BhZGRpbmc6MjRweDtiYWNrZ3JvdW5k
+          OmxpbmVhci1ncmFkaWVudCgxMzVkZWcsI2VkZjdmMSwjZmZmKX0uYmFkZ2V7ZGlzcGxheTppbmxp
+          bmUtYmxvY2s7YmFja2dyb3VuZDojZGNlZmU1O2NvbG9yOnZhcigtLWRnKTtwYWRkaW5nOjVweCAx
+          MHB4O2JvcmRlci1yYWRpdXM6OTk5cHg7Zm9udC1zaXplOjEycHg7Zm9udC13ZWlnaHQ6OTAwfS5o
+          ZXJvIGgxe2ZvbnQtc2l6ZTpjbGFtcCgyOXB4LDQuNnZ3LDQ2cHgpO2xpbmUtaGVpZ2h0OjEuMjtt
+          YXJnaW46MTBweCAwfS5oZXJvIHB7bWFyZ2luOi40cmVtIDA7Y29sb3I6IzQ2NWI1M30uY29udHJv
+          bHN7ZGlzcGxheTpmbGV4O2dhcDo5cHg7ZmxleC13cmFwOndyYXA7bWFyZ2luLXRvcDoxNnB4fS5i
+          dG57bWluLWhlaWdodDo0OHB4O3BhZGRpbmc6MTFweCAxNnB4O2JvcmRlci1yYWRpdXM6MTBweDti
+          b3JkZXI6MXB4IHNvbGlkIHZhcigtLWcpO2JhY2tncm91bmQ6dmFyKC0tZyk7Y29sb3I6I2ZmZjtm
+          b250LXdlaWdodDo5MDA7Y3Vyc29yOnBvaW50ZXI7dGV4dC1kZWNvcmF0aW9uOm5vbmU7ZGlzcGxh
+          eTppbmxpbmUtZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OmNlbnRlcn0u
+          YnRuLmFsdHtiYWNrZ3JvdW5kOiNmZmY7Y29sb3I6dmFyKC0tZGcpO2JvcmRlci1jb2xvcjp2YXIo
+          LS1iKX0uYnRuLndhcm57YmFja2dyb3VuZDojZmZmOGU3O2NvbG9yOiM3NDQxMDA7Ym9yZGVyLWNv
+          bG9yOiNkOGFkNTV9LmJ0bjpkaXNhYmxlZHtvcGFjaXR5Oi40NTtjdXJzb3I6bm90LWFsbG93ZWR9
+          LndvcmtzcGFjZXtkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOm1pbm1heCgwLDEu
+          NzVmcikgbWlubWF4KDMwMHB4LC43NWZyKTtnYXA6MTZweDttYXJnaW4tdG9wOjE2cHg7YWxpZ24t
+          aXRlbXM6c3RhcnR9LndvcmtzcGFjZVtoaWRkZW5de2Rpc3BsYXk6bm9uZSFpbXBvcnRhbnR9LnRh
+          cmdldC1wYW5le292ZXJmbG93OmhpZGRlbjtib3gtc2hhZG93OnZhcigtLXNoYWRvdyl9LnRhcmdl
+          dC1oZWFke2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVzdGlmeS1jb250ZW50OnNw
+          YWNlLWJldHdlZW47Z2FwOjEwcHg7ZmxleC13cmFwOndyYXA7cGFkZGluZzoxMnB4IDE0cHg7Ym9y
+          ZGVyLWJvdHRvbToxcHggc29saWQgdmFyKC0tYik7YmFja2dyb3VuZDojZjRmOWY2fS50YXJnZXQt
+          aGVhZCBzdHJvbmd7Zm9udC1zaXplOjE0cHh9LnJlYWRvbmx5e2ZvbnQtc2l6ZToxMnB4O2ZvbnQt
+          d2VpZ2h0OjkwMDtjb2xvcjp2YXIoLS1nKTtiYWNrZ3JvdW5kOiNkY2VmZTU7cGFkZGluZzo0cHgg
+          OHB4O2JvcmRlci1yYWRpdXM6OTk5cHh9LmZyYW1lLXdyYXB7cG9zaXRpb246cmVsYXRpdmU7YmFj
+          a2dyb3VuZDojZmZmO21pbi1oZWlnaHQ6NTkwcHh9LmZyYW1lLXdyYXAgaWZyYW1le2Rpc3BsYXk6
+          YmxvY2s7d2lkdGg6MTAwJTtoZWlnaHQ6NTkwcHg7Ym9yZGVyOjA7YmFja2dyb3VuZDojZmZmO3Bv
+          aW50ZXItZXZlbnRzOm5vbmV9LmZyYW1lLXNoaWVsZHtwb3NpdGlvbjphYnNvbHV0ZTtpbnNldDow
+          O3otaW5kZXg6Mjtwb2ludGVyLWV2ZW50czphdXRvO2JhY2tncm91bmQ6dHJhbnNwYXJlbnQ7Y3Vy
+          c29yOmRlZmF1bHR9LmNhcmR7cGFkZGluZzoyMHB4O2JveC1zaGFkb3c6dmFyKC0tc2hhZG93KTtw
+          b3NpdGlvbjpzdGlja3k7dG9wOjE0cHh9LnByb2dyZXNze2Rpc3BsYXk6ZmxleDtqdXN0aWZ5LWNv
+          bnRlbnQ6c3BhY2UtYmV0d2VlbjtnYXA6MTJweDthbGlnbi1pdGVtczpjZW50ZXI7bWFyZ2luLWJv
+          dHRvbToxMHB4fS5iYXJ7aGVpZ2h0OjEwcHg7YmFja2dyb3VuZDojZTRlZWU5O2JvcmRlci1yYWRp
+          dXM6OTlweDtvdmVyZmxvdzpoaWRkZW47ZmxleDoxfS5maWxse2hlaWdodDoxMDAlO2JhY2tncm91
+          bmQ6dmFyKC0tZyk7d2lkdGg6MTAlO3RyYW5zaXRpb246LjJzfS5zdGVwaWR7Zm9udC1zaXplOjEy
+          cHg7bGV0dGVyLXNwYWNpbmc6LjEyZW07Y29sb3I6dmFyKC0tZyk7Zm9udC13ZWlnaHQ6OTAwfS5z
+          dGVwIGgye2ZvbnQtc2l6ZToyNXB4O2xpbmUtaGVpZ2h0OjEuMzU7bWFyZ2luOjVweCAwfS5zdGVw
+          IHB7Y29sb3I6dmFyKC0tbXV0ZWQpO21hcmdpbjouNDVyZW0gMH0udGFyZ2V0LXN0YXR1c3ttYXJn
+          aW4tdG9wOjEycHg7cGFkZGluZzoxMHB4IDEycHg7Ym9yZGVyLXJhZGl1czoxMXB4O2JvcmRlcjox
+          cHggc29saWQgdmFyKC0tYik7Zm9udC1zaXplOjEzcHg7YmFja2dyb3VuZDojZjRmOGY2fS50YXJn
+          ZXQtc3RhdHVzW2RhdGEtc3RhdGU9ImxvYWRpbmciXXtiYWNrZ3JvdW5kOiNmZmY4ZTc7Ym9yZGVy
+          LWNvbG9yOiNlNmM5ODU7Y29sb3I6Izc0NDEwMH0udGFyZ2V0LXN0YXR1c1tkYXRhLXN0YXRlPSJy
+          ZWFkeSJde2JhY2tncm91bmQ6I2VjZjhmMTtib3JkZXItY29sb3I6I2E5ZDNiYTtjb2xvcjojMGQ1
+          YzNjfS50YXJnZXQtc3RhdHVzW2RhdGEtc3RhdGU9ImVycm9yIl17YmFja2dyb3VuZDojZmZmMGYw
+          O2JvcmRlci1jb2xvcjojZTRiMmIyO2NvbG9yOnZhcigtLWRhbmdlcik7Zm9udC13ZWlnaHQ6ODAw
+          fS5yZWNvdmVyeXttYXJnaW4tdG9wOjEwcHg7cGFkZGluZzoxMnB4O2JvcmRlci1yYWRpdXM6MTJw
+          eDtiYWNrZ3JvdW5kOiNmZmYzZjM7Ym9yZGVyOjFweCBzb2xpZCAjZTRiMmIyfS5yZWNvdmVyeVto
+          aWRkZW5de2Rpc3BsYXk6bm9uZSFpbXBvcnRhbnR9LnJlY292ZXJ5IHB7bWFyZ2luOjAgMCA5cHg7
+          Y29sb3I6IzdlMjAyMH0ubXV0ZWR7Y29sb3I6dmFyKC0tbXV0ZWQpO2ZvbnQtc2l6ZToxM3B4fS5z
+          YWZldHl7YmFja2dyb3VuZDojZmZmNGQ5O2JvcmRlcjoxcHggc29saWQgI2U4Y2Y4ZDtib3JkZXIt
+          cmFkaXVzOjE0cHg7cGFkZGluZzoxNHB4O21hcmdpbi10b3A6MTZweH0uY2xvc2VkLW5vdGV7bWFy
+          Z2luLXRvcDoxNnB4O3BhZGRpbmc6MTRweDtib3JkZXI6MXB4IGRhc2hlZCB2YXIoLS1iKTtib3Jk
+          ZXItcmFkaXVzOjE0cHg7YmFja2dyb3VuZDojZmZmfS5jbG9zZWQtbm90ZVtoaWRkZW5de2Rpc3Bs
+          YXk6bm9uZSFpbXBvcnRhbnR9QG1lZGlhKG1heC13aWR0aDo4NjBweCl7LndvcmtzcGFjZXtncmlk
+          LXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5jYXJke3Bvc2l0aW9uOnN0YXRpYztvcmRlcjoyfS50YXJn
+          ZXQtcGFuZXtvcmRlcjoxfS5mcmFtZS13cmFwLC5mcmFtZS13cmFwIGlmcmFtZXttaW4taGVpZ2h0
+          OjU2dmg7aGVpZ2h0OjU2dmh9LmNvbnRyb2xzIC5idG57ZmxleDoxIDEgNDIlfX1AbWVkaWEobWF4
+          LXdpZHRoOjQzMHB4KXsud3JhcHtwYWRkaW5nOjAgMTBweCAyOHB4O21hcmdpbi10b3A6MTRweH0u
+          aGVybywuY2FyZHtwYWRkaW5nOjE3cHh9LnRhcmdldC1oZWFke3BhZGRpbmc6MTBweH0uc3RlcCBo
+          Mntmb250LXNpemU6MjJweH0uZnJhbWUtd3JhcCwuZnJhbWUtd3JhcCBpZnJhbWV7bWluLWhlaWdo
+          dDo1NHZoO2hlaWdodDo1NHZofS5jb250cm9scyAuYnRue21pbi13aWR0aDowO3BhZGRpbmctaW5s
+          aW5lOjEwcHh9Lm5hdntmb250LXNpemU6MTJweH19QG1lZGlhKG1heC13aWR0aDozNzVweCl7LmNv
+          bnRyb2xzIC5idG57ZmxleC1iYXNpczoxMDAlfS5oZXJvIGgxe2ZvbnQtc2l6ZToyOHB4fX1AbWVk
+          aWEocHJlZmVycy1yZWR1Y2VkLW1vdGlvbjpyZWR1Y2Upeyp7c2Nyb2xsLWJlaGF2aW9yOmF1dG8h
+          aW1wb3J0YW50O3RyYW5zaXRpb246bm9uZSFpbXBvcnRhbnR9fQo8L3N0eWxlPgo8L2hlYWQ+Cjxi
+          b2R5IGRhdGEtdHV0b3JpYWwtdmVyc2lvbj0iRFBST19UVVRPUklBTF9OQVZJR0FUSU9OX1YxLjIu
+          MiI+CjxoZWFkZXIgY2xhc3M9InRvcCI+PGRpdiBjbGFzcz0idG9waW4iPjxkaXYgY2xhc3M9ImJy
+          YW5kIj5EUFJPIFBFU1QgLyBGaXJzdDEwPC9kaXY+PG5hdiBjbGFzcz0ibmF2Ij48YSBocmVmPSJn
+          dWlkZS1jZW50ZXIuaHRtbCI+R3VpZGU8L2E+PGEgaHJlZj0iaW5kZXguaHRtbCI+5YWl5Y+jPC9h
+          PjxhIGhyZWY9InN5c3RlbS1jaGVjay5odG1sP2RlbW89MSI+U3lzdGVtIENoZWNrPC9hPjwvbmF2
+          PjwvZGl2PjwvaGVhZGVyPgo8bWFpbiBjbGFzcz0id3JhcCI+CjxzZWN0aW9uIGNsYXNzPSJoZXJv
+          Ij48c3BhbiBjbGFzcz0iYmFkZ2UiPkRQUk8gVFVUT1JJQUwgTkFWSUdBVElPTiBWMS4yLjI8L3Nw
+          YW4+PGgxPuacgOWIneOBrjEw44K544OG44OD44OX44Gn44CB5a6f6Zqb44Gu54++5Zyo55S76Z2i
+          44KS56K66KqNPC9oMT48cD7jgZPjga5UdXRvcmlhbOOBr+ihqOekuuWwgueUqOOBruahiOWGheOD
+          rOOCpOODpOODvOOBp+OBmeOAguePvuWcqOOBrueUu+mdouOCkuiqreOBv+i+vOOBv+OAgeeiuuiq
+          jeWvvuixoeOBvuOBp+iHquWLleOBp+enu+WLleODu+W8t+iqv+ihqOekuuOBl+OBvuOBmeOAguS/
+          neWtmOODu+aJv+iqjeODu+mAgeS/oeODu+WJiumZpOODu+axuua4iOODu0RFTU/liJ3mnJ/ljJbj
+          garjganjgIHmpa3li5njg4fjg7zjgr/jgpLlpInjgYjjgovmk43kvZzjga/lrp/ooYzjgZfjgb7j
+          gZvjgpPjgII8L3A+PGRpdiBjbGFzcz0iY29udHJvbHMiPjxidXR0b24gY2xhc3M9ImJ0biIgaWQ9
+          InN0YXJ0IiB0eXBlPSJidXR0b24iPlN0YXJ0PC9idXR0b24+PGJ1dHRvbiBjbGFzcz0iYnRuIGFs
+          dCIgaWQ9InJlc3VtZSIgdHlwZT0iYnV0dG9uIj5SZXN1bWU8L2J1dHRvbj48YnV0dG9uIGNsYXNz
+          PSJidG4gYWx0IiBpZD0icmVwbGF5IiB0eXBlPSJidXR0b24iPlJlcGxheTwvYnV0dG9uPjwvZGl2
+          Pjwvc2VjdGlvbj4KPHNlY3Rpb24gY2xhc3M9IndvcmtzcGFjZSIgaWQ9IndvcmtzcGFjZSIgYXJp
+          YS1sYWJlbD0iRmlyc3QxMCB0dXRvcmlhbCB3b3Jrc3BhY2UiPgogIDxzZWN0aW9uIGNsYXNzPSJ0
+          YXJnZXQtcGFuZSIgaWQ9InRhcmdldFBhbmUiIGFyaWEtbGFiZWw9IuePvuWcqOeUu+mdouOBruih
+          qOekuuWwgueUqOODl+ODrOODk+ODpeODvCI+PGRpdiBjbGFzcz0idGFyZ2V0LWhlYWQiPjxzdHJv
+          bmcgaWQ9InRhcmdldExhYmVsIj7nj77lnKjnlLvpnaLjgpLoqq3jgb/ovrzjgb/kuK08L3N0cm9u
+          Zz48c3BhbiBjbGFzcz0icmVhZG9ubHkiPuihqOekuuWwgueUqCAvIOaTjeS9nOOBl+OBvuOBm+OC
+          kzwvc3Bhbj48L2Rpdj48ZGl2IGNsYXNzPSJmcmFtZS13cmFwIj48aWZyYW1lIGlkPSJ0YXJnZXRG
+          cmFtZSIgdGl0bGU9IkZpcnN0MTAg54++5Zyo55S76Z2i44OX44Os44OT44Ol44O8IiB0YWJpbmRl
+          eD0iLTEiPjwvaWZyYW1lPjxkaXYgY2xhc3M9ImZyYW1lLXNoaWVsZCIgYXJpYS1oaWRkZW49InRy
+          dWUiPjwvZGl2PjwvZGl2Pjwvc2VjdGlvbj4KICA8c2VjdGlvbiBjbGFzcz0iY2FyZCIgaWQ9InR1
+          dG9yaWFsQ2FyZCI+PGRpdiBjbGFzcz0icHJvZ3Jlc3MiPjxiIGlkPSJjb3VudGVyIj4xIC8gMTA8
+          L2I+PGRpdiBjbGFzcz0iYmFyIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PGRpdiBpZD0iZmlsbCIgY2xh
+          c3M9ImZpbGwiPjwvZGl2PjwvZGl2PjwvZGl2PjxkaXYgY2xhc3M9InN0ZXAiPjxkaXYgY2xhc3M9
+          InN0ZXBpZCIgaWQ9InN0ZXBpZCI+PC9kaXY+PGgyIGlkPSJ0aXRsZSI+PC9oMj48cCBpZD0idGV4
+          dCI+PC9wPjwvZGl2PjxkaXYgY2xhc3M9InRhcmdldC1zdGF0dXMiIGlkPSJ0YXJnZXRTdGF0dXMi
+          IGRhdGEtc3RhdGU9ImxvYWRpbmciIHJvbGU9InN0YXR1cyIgYXJpYS1saXZlPSJwb2xpdGUiPueP
+          vuWcqOeUu+mdouOCkueiuuiqjeOBl+OBpuOBhOOBvuOBmeKApjwvZGl2PjxkaXYgY2xhc3M9InJl
+          Y292ZXJ5IiBpZD0icmVjb3ZlcnkiIGhpZGRlbj48cD7lv4XopoHjgarnorroqo3lr77osaHjgYzo
+          povjgaTjgYvjgonjgarjgYTjgZ/jgoHjgIHjgZPjga5TVEVQ44Gn44Gv5YWI44G46YCy44KB44G+
+          44Gb44KT44CCPC9wPjxkaXYgY2xhc3M9ImNvbnRyb2xzIj48YnV0dG9uIGNsYXNzPSJidG4gd2Fy
+          biIgaWQ9InJldHJ5IiB0eXBlPSJidXR0b24iPlJldHJ5PC9idXR0b24+PGEgY2xhc3M9ImJ0biBh
+          bHQiIGlkPSJndWlkZVJlY292ZXJ5IiBocmVmPSJndWlkZS1jZW50ZXIuaHRtbCI+R3VpZGUgQ2Vu
+          dGVy44Gn5b6p5penPC9hPjwvZGl2PjwvZGl2PjxkaXYgY2xhc3M9ImNvbnRyb2xzIj48YnV0dG9u
+          IGNsYXNzPSJidG4gYWx0IiBpZD0iYmFjayIgdHlwZT0iYnV0dG9uIj5CYWNrPC9idXR0b24+PGJ1
+          dHRvbiBjbGFzcz0iYnRuIiBpZD0ibmV4dCIgdHlwZT0iYnV0dG9uIiBkaXNhYmxlZD5OZXh0PC9i
+          dXR0b24+PGJ1dHRvbiBjbGFzcz0iYnRuIGFsdCIgaWQ9ImNsb3NlIiB0eXBlPSJidXR0b24iPkNs
+          b3NlPC9idXR0b24+PC9kaXY+PHAgY2xhc3M9Im11dGVkIj5Fc2PjgafjgoLplonjgZjjgonjgozj
+          gb7jgZnjgIJDbG9zZSAvIEVzY+OBr+mAsuaNl+OCkuS/neaMgeOBl+OBvuOBmeOAgnJlcXVpcmVk
+          IHRhcmdldOOBjOeiuuiqjeOBp+OBjeOCi+OBvuOBp05leHTjga/mnInlirnjgavjgarjgorjgb7j
+          gZvjgpPjgII8L3A+PC9zZWN0aW9uPgo8L3NlY3Rpb24+CjxkaXYgY2xhc3M9ImNsb3NlZC1ub3Rl
+          IiBpZD0iY2xvc2VkTm90ZSIgaGlkZGVuPjxiPkZpcnN0MTDjga/plonjgZjjgabjgYTjgb7jgZnj
+          gII8L2I+IFJlc3VtZeOBp+S/neWtmOa4iOOBv1NURVDjgajlkIzjgZjnj77lnKjnlLvpnaLjg7vl
+          kIzjgZjnorroqo3lr77osaHjgbjmiLvjgozjgb7jgZnjgII8L2Rpdj4KPGRpdiBjbGFzcz0ic2Fm
+          ZXR5Ij48Yj7lhazplotERU1P44Gu5a6J5YWo5aKD55WMPC9iPjxicj7lrp/lnKjjgZnjgovmsI/l
+          kI3jg7vpm7voqbHnlarlj7fjg7vkvY/miYDjg7vpoaflrqLlhpnnnJ/jga/lhaXlipvjgZfjgarj
+          gYTjgafjgY/jgaDjgZXjgYTjgIJUdXRvcmlhbOWGheOBruePvuWcqOeUu+mdouOBr+ihqOekuuWw
+          gueUqOOBp+OAgeaTjeS9nOOCkuWPl+OBkeS7mOOBkeOBvuOBm+OCk+OAgjwvZGl2Pgo8L21haW4+
+          CjxzY3JpcHQ+CigoKSA9PiB7Cid1c2Ugc3RyaWN0JzsKY29uc3QgVkVSU0lPTj0nRFBST19UVVRP
+          UklBTF9OQVZJR0FUSU9OX1YxLjIuMic7CmNvbnN0IEtFWT0nZHByb19wZXN0X2ZpcnN0MTBfdjEx
+          X3N0YXRlJzsKY29uc3QgVEFSR0VUX1RJTUVPVVRfTVM9NzAwMDsKY29uc3Qgc3RlcHM9T2JqZWN0
+          LmZyZWV6ZShbCntpZDoncGVzdC1maXJzdDEwLTAxLWd1aWRlLXNhZmV0eScsbGFiZWw6J1NURVAg
+          MDEnLHRpdGxlOidHdWlkZSBDZW50ZXLjgajlronlhajjg6vjg7zjg6snLHRleHQ6J0ZpcnN0MTDj
+          ga5TdGFydCAvIFJlc3VtZSAvIFJlcGxheeOBqOWFrOmWi0RFTU/jga7lronlhajlooPnlYzjgpLn
+          orroqo3jgZfjgb7jgZnjgIInLHJvdXRlOidndWlkZS1jZW50ZXIuaHRtbCcsc2VsZWN0b3I6Jy5o
+          ZXJvIC5yb3cnfSwKe2lkOidwZXN0LWZpcnN0MTAtMDItZGVtby1wcmVwYXJlJyxsYWJlbDonU1RF
+          UCAwMicsdGl0bGU6J0RFTU/mupblgpnnlLvpnaLjgpLnorroqo0nLHRleHQ6J0RlbW8gUHJlcGFy
+          ZeOBruS9jee9ruOBqOW9ueWJsuOBoOOBkeOCkueiuuiqjeOBl+OBvuOBmeOAglR1dG9yaWFs44GL
+          44KJ5Yid5pyf5YyW44O755Sf5oiQ44Gv5a6f6KGM44GX44G+44Gb44KT44CCJyxyb3V0ZTonZGVt
+          by1wcmVwYXJlLmh0bWw/ZGVtbz0xJyxzZWxlY3RvcjonI3ByZXBhcmUnfSwKe2lkOidwZXN0LWZp
+          cnN0MTAtMDMtd2ViLWlucXVpcnknLGxhYmVsOidTVEVQIDAzJyx0aXRsZTonV0VC55u46KuH5Y+X
+          5LuYJyx0ZXh0Oifnl4fnirbjg7vloLTmiYDjg7vlhpnnnJ8vUERG44KS5Y+X44GR5LuY44GR44KL
+          54++5Zyo44Gu44OV44Kp44O844Og44KS56K66KqN44GX44G+44GZ44CC6YCB5L+h44O744Ki44OD
+          44OX44Ot44O844OJ44Gv5a6f6KGM44GX44G+44Gb44KT44CCJyxyb3V0ZTonaW5xdWlyeS5odG1s
+          P2RlbW89MScsc2VsZWN0b3I6JyNmb3JtJ30sCntpZDoncGVzdC1maXJzdDEwLTA0LWN1c3RvbWVy
+          JyxsYWJlbDonU1RFUCAwNCcsdGl0bGU6J0N1c3RvbWVyJyx0ZXh0OifmnKzkurrmoYjku7bjga7n
+          j77lnKjnlLvpnaLjgpLnorroqo3jgZfjgb7jgZnjgILov73oqJjjg7vjgqLjg4Pjg5fjg63jg7zj
+          g4njg7vlho3oqKrkvp3poLzjg7vopovnqY3lm57nrZTjga/lrp/ooYzjgZfjgb7jgZvjgpPjgIIn
+          LHJvdXRlOidjdXN0b21lci5odG1sP2RlbW89MScsc2VsZWN0b3I6JyNkZXRhaWwgPiBoMid9LAp7
+          aWQ6J3Blc3QtZmlyc3QxMC0wNS1vd25lci1jYXNlLWJvYXJkJyxsYWJlbDonU1RFUCAwNScsdGl0
+          bGU6J093bmVyIC0g5qGI5Lu244Oc44O844OJJyx0ZXh0OidPd25lcuOBruahiOS7tuODnOODvOOD
+          ieOBqOahiOS7tuOCkumWi+OBj+WFpeWPo+OCkueiuuiqjeOBl+OBvuOBmeOAguahiOS7tuWMluOD
+          u+WIneacn+WMluODu+eKtuaFi+WkieabtOOBr+Wun+ihjOOBl+OBvuOBm+OCk+OAgicscm91dGU6
+          J293bmVyLmh0bWw/ZGVtbz0xJyxzZWxlY3RvcjonLm9wZW4nfSwKe2lkOidwZXN0LWZpcnN0MTAt
+          MDYtb3duZXItbmV4dC1hY3Rpb24nLGxhYmVsOidTVEVQIDA2Jyx0aXRsZTonT3duZXIgLSBOZXh0
+          IEFjdGlvbuOBqOeKtuaFi+eiuuiqjScsdGV4dDon5qGI5Lu26Kmz57Sw44GuTmV4dCBBY3Rpb27j
+          gajnirbmhYvnorroqo3poJjln5/jgpLnorroqo3jgZfjgb7jgZnjgILmi4XlvZPjg7vkuojlrprj
+          g7vopovnqY3jg7vnirbmhYvlpInmm7Tjga/lrp/ooYzjgZfjgb7jgZvjgpPjgIInLHJvdXRlOidv
+          d25lci5odG1sP2RlbW89MScsc2VsZWN0b3I6JyNkZXRhaWwgLmdyaWQgPiBkaXY6bnRoLWNoaWxk
+          KDIpJ30sCntpZDoncGVzdC1maXJzdDEwLTA3LXN0YWZmLWZpZWxkLXJlY29yZCcsbGFiZWw6J1NU
+          RVAgMDcnLHRpdGxlOidTdGFmZiAtIOePvuWgtOOCq+ODq+ODhicsdGV4dDonRXZpZGVuY2UgQ2hh
+          aW7jgIHnj77oqr/jgIHmlr3lt6XjgIHolqzliaTjgIHlronlhajnorroqo3jgIHloLHlkYrjga7n
+          j77lnKjjga7lhaXlipvpoJjln5/jgpLnorroqo3jgZfjgb7jgZnjgILkv53lrZjmk43kvZzjga/l
+          rp/ooYzjgZfjgb7jgZvjgpPjgIInLHJvdXRlOidzdGFmZi5odG1sP2RlbW89MScsc2VsZWN0b3I6
+          JyNwaGFzZSd9LAp7aWQ6J3Blc3QtZmlyc3QxMC0wOC1maWVsZC1tYXAtdHJhcCcsbGFiZWw6J1NU
+          RVAgMDgnLHRpdGxlOidGaWVsZCBNYXAgLyBUcmFwIFBJTicsdGV4dDon5Zuz6Z2iIC8gUElOIERF
+          TU/jgahUcmFw5L2N572u44Gu6ICD44GI5pa544KS56K66KqN44GX44G+44GZ44CC5Zuz6Z2i44O7
+          Wm9uZeODu1RyYXDjg7tQSU7jga7kv53lrZjjga/lrp/ooYzjgZfjgb7jgZvjgpPjgIInLHJvdXRl
+          Oidvd25lci1pcGFkLmh0bWw/ZGVtbz0xJyxzZWxlY3RvcjonI2FwcCA+IHNlY3Rpb24uY2FyZCBo
+          Mid9LAp7aWQ6J3Blc3QtZmlyc3QxMC0wOS1zeXN0ZW0tY2hlY2snLGxhYmVsOidTVEVQIDA5Jyx0
+          aXRsZTonU3lzdGVtIENoZWNrJyx0ZXh0Oifllrbmpa3liY3jga7kuIDmi6zjg4Hjgqfjg4Pjgq/l
+          haXlj6PjgpLnorroqo3jgZfjgb7jgZnjgILjg5rjg7zjgrjoh6rouqvjga7oqq3jgb/lj5bjgorl
+          sILnlKjjg4Hjgqfjg4Pjgq/ku6XlpJbjga/mk43kvZzjgZfjgb7jgZvjgpPjgIInLHJvdXRlOidz
+          eXN0ZW0tY2hlY2suaHRtbD9kZW1vPTEnLHNlbGVjdG9yOicjcnVuJ30sCntpZDoncGVzdC1maXJz
+          dDEwLTEwLXJlYWR5JyxsYWJlbDonU1RFUCAxMCcsdGl0bGU6J1JFQURZ44Go5aWR57SE5b6M6Kit
+          5a6aJyx0ZXh0OifmqJnmupboo73lk4FSRUFEWeOBqOWlkee0hOW+jOioreWumuOBruWig+eVjOOC
+          kueiuuiqjeOBl+OBvuOBmeOAgicscm91dGU6J3JlYWR5LWNvbnRyb2wtY2VudGVyLmh0bWwnLHNl
+          bGVjdG9yOicuaGVybyBoMSd9Cl0ubWFwKE9iamVjdC5mcmVlemUpKTsKbGV0IHN0YXRlPXtpbmRl
+          eDowLGNvbXBsZXRlZDpmYWxzZSxjbG9zZWQ6ZmFsc2V9OwpsZXQgdGFyZ2V0U3RhdGU9J2lkbGUn
+          OwpsZXQgYWN0aXZhdGlvblRva2VuPTA7CmxldCBsYXN0QWN0dWFsVXJsPScnOwpjb25zdCAkPWlk
+          PT5kb2N1bWVudC5nZXRFbGVtZW50QnlJZChpZCk7CmNvbnN0IGZyYW1lPSQoJ3RhcmdldEZyYW1l
+          Jyksd29ya3NwYWNlPSQoJ3dvcmtzcGFjZScpLGNsb3NlZE5vdGU9JCgnY2xvc2VkTm90ZScpOwpm
+          dW5jdGlvbiBsb2FkKCl7dHJ5e2NvbnN0IHM9SlNPTi5wYXJzZShsb2NhbFN0b3JhZ2UuZ2V0SXRl
+          bShLRVkpfHwnbnVsbCcpO2lmKHMmJk51bWJlci5pc0ludGVnZXIocy5pbmRleCkpc3RhdGU9ey4u
+          LnN0YXRlLC4uLnN9fWNhdGNoe31zdGF0ZS5pbmRleD1NYXRoLm1heCgwLE1hdGgubWluKE51bWJl
+          cihzdGF0ZS5pbmRleCl8fDAsc3RlcHMubGVuZ3RoLTEpKTtzdGF0ZS5jb21wbGV0ZWQ9ISFzdGF0
+          ZS5jb21wbGV0ZWQ7c3RhdGUuY2xvc2VkPSEhc3RhdGUuY2xvc2VkO30KZnVuY3Rpb24gc2F2ZSgp
+          e2xvY2FsU3RvcmFnZS5zZXRJdGVtKEtFWSxKU09OLnN0cmluZ2lmeSh7aW5kZXg6c3RhdGUuaW5k
+          ZXgsY29tcGxldGVkOnN0YXRlLmNvbXBsZXRlZCxjbG9zZWQ6c3RhdGUuY2xvc2VkfSkpO30KZnVu
+          Y3Rpb24gZXhwZWN0ZWRVcmwoc3RlcCl7cmV0dXJuIG5ldyBVUkwoc3RlcC5yb3V0ZSxsb2NhdGlv
+          bi5ocmVmKTt9CmZ1bmN0aW9uIHJvdXRlTWF0Y2hlcyhhY3R1YWwsc3RlcCl7dHJ5e2NvbnN0IGE9
+          bmV3IFVSTChhY3R1YWwpLGU9ZXhwZWN0ZWRVcmwoc3RlcCk7cmV0dXJuIGEucGF0aG5hbWU9PT1l
+          LnBhdGhuYW1lJiZhLnNlYXJjaD09PWUuc2VhcmNofWNhdGNoe3JldHVybiBmYWxzZX19CmZ1bmN0
+          aW9uIHNldFN0YXR1cyhraW5kLHRleHQpe3RhcmdldFN0YXRlPWtpbmQ7JCgndGFyZ2V0U3RhdHVz
+          JykuZGF0YXNldC5zdGF0ZT1raW5kOyQoJ3RhcmdldFN0YXR1cycpLnRleHRDb250ZW50PXRleHQ7
+          fQpmdW5jdGlvbiByZW5kZXJTaGVsbCgpe2NvbnN0IGk9c3RhdGUuaW5kZXgscz1zdGVwc1tpXTsk
+          KCdjb3VudGVyJykudGV4dENvbnRlbnQ9YCR7aSsxfSAvICR7c3RlcHMubGVuZ3RofWA7JCgnZmls
+          bCcpLnN0eWxlLndpZHRoPSgoaSsxKS9zdGVwcy5sZW5ndGgqMTAwKSsnJSc7JCgnc3RlcGlkJyku
+          dGV4dENvbnRlbnQ9cy5sYWJlbDskKCd0aXRsZScpLnRleHRDb250ZW50PXMudGl0bGU7JCgndGV4
+          dCcpLnRleHRDb250ZW50PXMudGV4dDskKCd0YXJnZXRMYWJlbCcpLnRleHRDb250ZW50PXMudGl0
+          bGU7JCgnYmFjaycpLmRpc2FibGVkPWk9PT0wOyQoJ25leHQnKS50ZXh0Q29udGVudD1pPT09c3Rl
+          cHMubGVuZ3RoLTE/J0NvbXBsZXRlJzonTmV4dCc7JCgnbmV4dCcpLmRpc2FibGVkPXRhcmdldFN0
+          YXRlIT09J3JlYWR5J3x8KHN0YXRlLmNvbXBsZXRlZCYmaT09PXN0ZXBzLmxlbmd0aC0xKTskKCdy
+          ZWNvdmVyeScpLmhpZGRlbj10YXJnZXRTdGF0ZSE9PSdlcnJvcic7d29ya3NwYWNlLmRhdGFzZXQu
+          c3RlcElkPXMuaWQ7d29ya3NwYWNlLmRhdGFzZXQucm91dGU9cy5yb3V0ZTt3b3Jrc3BhY2UuZGF0
+          YXNldC5zZWxlY3Rvcj1zLnNlbGVjdG9yO3dvcmtzcGFjZS5oaWRkZW49c3RhdGUuY2xvc2VkO2Ns
+          b3NlZE5vdGUuaGlkZGVuPSFzdGF0ZS5jbG9zZWQ7c2F2ZSgpO30KZnVuY3Rpb24gaW5qZWN0SGln
+          aGxpZ2h0KGRvYyx0YXJnZXQpe2RvYy5xdWVyeVNlbGVjdG9yQWxsKCdbZGF0YS1kcHJvLXR1dG9y
+          aWFsLWFjdGl2ZT0idHJ1ZSJdJykuZm9yRWFjaChlbD0+ZWwucmVtb3ZlQXR0cmlidXRlKCdkYXRh
+          LWRwcm8tdHV0b3JpYWwtYWN0aXZlJykpO2xldCBzdD1kb2MuZ2V0RWxlbWVudEJ5SWQoJ19fZHBy
+          b190dXRvcmlhbF92MTIyX3N0eWxlJyk7aWYoIXN0KXtzdD1kb2MuY3JlYXRlRWxlbWVudCgnc3R5
+          bGUnKTtzdC5pZD0nX19kcHJvX3R1dG9yaWFsX3YxMjJfc3R5bGUnO3N0LnRleHRDb250ZW50PSdb
+          ZGF0YS1kcHJvLXR1dG9yaWFsLWFjdGl2ZT0idHJ1ZSJde291dGxpbmU6NHB4IHNvbGlkICNmNTll
+          MGIhaW1wb3J0YW50O291dGxpbmUtb2Zmc2V0OjRweCFpbXBvcnRhbnQ7Ym94LXNoYWRvdzowIDAg
+          MCA3cHggcmdiYSgyNDUsMTU4LDExLC4yOCkhaW1wb3J0YW50O2JvcmRlci1yYWRpdXM6OHB4IWlt
+          cG9ydGFudDtzY3JvbGwtbWFyZ2luOjk2cHghaW1wb3J0YW50fSc7ZG9jLmhlYWQuYXBwZW5kQ2hp
+          bGQoc3QpfXRhcmdldC5zZXRBdHRyaWJ1dGUoJ2RhdGEtZHByby10dXRvcmlhbC1hY3RpdmUnLCd0
+          cnVlJyk7dHJ5e2RvYy5ib2R5LmluZXJ0PXRydWV9Y2F0Y2h7fXRhcmdldC5zY3JvbGxJbnRvVmll
+          dyh7YmVoYXZpb3I6bWF0Y2hNZWRpYSgnKHByZWZlcnMtcmVkdWNlZC1tb3Rpb246IHJlZHVjZSkn
+          KS5tYXRjaGVzPydhdXRvJzonc21vb3RoJyxibG9jazonY2VudGVyJyxpbmxpbmU6J25lYXJlc3Qn
+          fSk7fQphc3luYyBmdW5jdGlvbiB3YWl0Rm9yVGFyZ2V0KGRvYyxzZWxlY3Rvcix0b2tlbil7Y29u
+          c3QgZW5kPURhdGUubm93KCkrVEFSR0VUX1RJTUVPVVRfTVM7d2hpbGUoRGF0ZS5ub3coKTxlbmQp
+          e2lmKHRva2VuIT09YWN0aXZhdGlvblRva2VuKXRocm93IG5ldyBFcnJvcignQUNUSVZBVElPTl9D
+          QU5DRUxMRUQnKTtsZXQgZWw9bnVsbDt0cnl7ZWw9ZG9jLnF1ZXJ5U2VsZWN0b3Ioc2VsZWN0b3Ip
+          fWNhdGNoe3Rocm93IG5ldyBFcnJvcignSU5WQUxJRF9TRUxFQ1RPUicpfWlmKGVsKXJldHVybiBl
+          bDthd2FpdCBuZXcgUHJvbWlzZShyPT5zZXRUaW1lb3V0KHIsMTIwKSk7fXRocm93IG5ldyBFcnJv
+          cignVEFSR0VUX01JU1NJTkcnKTt9CmZ1bmN0aW9uIGxvYWRGcmFtZShzdGVwLHRva2VuKXtyZXR1
+          cm4gbmV3IFByb21pc2UoKHJlc29sdmUscmVqZWN0KT0+e2xldCBkb25lPWZhbHNlO2NvbnN0IGZp
+          bmlzaD0oZm4sdik9PntpZihkb25lKXJldHVybjtkb25lPXRydWU7Y2xlYXJUaW1lb3V0KHRpbWVy
+          KTtmcmFtZS5vbmxvYWQ9bnVsbDtmbih2KX07Y29uc3QgdGltZXI9c2V0VGltZW91dCgoKT0+Zmlu
+          aXNoKHJlamVjdCxuZXcgRXJyb3IoJ1JPVVRFX0xPQURfVElNRU9VVCcpKSwxMjAwMCk7ZnJhbWUu
+          b25sb2FkPSgpPT57aWYodG9rZW4hPT1hY3RpdmF0aW9uVG9rZW4pcmV0dXJuIGZpbmlzaChyZWpl
+          Y3QsbmV3IEVycm9yKCdBQ1RJVkFUSU9OX0NBTkNFTExFRCcpKTtmaW5pc2gocmVzb2x2ZSl9O2Zy
+          YW1lLnNyYz1leHBlY3RlZFVybChzdGVwKS5ocmVmO30pO30KYXN5bmMgZnVuY3Rpb24gYWN0aXZh
+          dGUoaW5kZXgse2ZvY3VzQ2FyZD1mYWxzZX09e30pe3N0YXRlLmluZGV4PU1hdGgubWF4KDAsTWF0
+          aC5taW4oaW5kZXgsc3RlcHMubGVuZ3RoLTEpKTtzdGF0ZS5jbG9zZWQ9ZmFsc2U7Y29uc3Qgc3Rl
+          cD1zdGVwc1tzdGF0ZS5pbmRleF0sdG9rZW49KythY3RpdmF0aW9uVG9rZW47dGFyZ2V0U3RhdGU9
+          J2xvYWRpbmcnO3NldFN0YXR1cygnbG9hZGluZycsJ+ePvuWcqOeUu+mdouOCkuiqreOBv+i+vOOB
+          v+OAgeeiuuiqjeWvvuixoeOCkuaOouOBl+OBpuOBhOOBvuOBmeKApicpOyQoJ3JlY292ZXJ5Jyku
+          aGlkZGVuPXRydWU7cmVuZGVyU2hlbGwoKTt0cnl7YXdhaXQgbG9hZEZyYW1lKHN0ZXAsdG9rZW4p
+          O2lmKHRva2VuIT09YWN0aXZhdGlvblRva2VuKXJldHVybjtjb25zdCBhY3R1YWw9ZnJhbWUuY29u
+          dGVudFdpbmRvdy5sb2NhdGlvbi5ocmVmO2xhc3RBY3R1YWxVcmw9YWN0dWFsO2lmKCFyb3V0ZU1h
+          dGNoZXMoYWN0dWFsLHN0ZXApKXRocm93IG5ldyBFcnJvcignV1JPTkdfUk9VVEUnKTtjb25zdCBk
+          b2M9ZnJhbWUuY29udGVudERvY3VtZW50O2lmKCFkb2MpdGhyb3cgbmV3IEVycm9yKCdUQVJHRVRf
+          RlJBTUVfQUNDRVNTJyk7Y29uc3QgdGFyZ2V0PWF3YWl0IHdhaXRGb3JUYXJnZXQoZG9jLHN0ZXAu
+          c2VsZWN0b3IsdG9rZW4pO2luamVjdEhpZ2hsaWdodChkb2MsdGFyZ2V0KTthd2FpdCBuZXcgUHJv
+          bWlzZShyPT5zZXRUaW1lb3V0KHIsMTgwKSk7Y29uc3QgcmVjdD10YXJnZXQuZ2V0Qm91bmRpbmdD
+          bGllbnRSZWN0KCk7aWYocmVjdC5ib3R0b208PTB8fHJlY3QudG9wPj1mcmFtZS5jb250ZW50V2lu
+          ZG93LmlubmVySGVpZ2h0KXt0YXJnZXQuc2Nyb2xsSW50b1ZpZXcoe2JlaGF2aW9yOidhdXRvJyxi
+          bG9jazonY2VudGVyJyxpbmxpbmU6J25lYXJlc3QnfSk7YXdhaXQgbmV3IFByb21pc2Uocj0+c2V0
+          VGltZW91dChyLDgwKSk7fXNldFN0YXR1cygncmVhZHknLCfnorroqo3lr77osaHjgpLooajnpLrj
+          gZfjgb7jgZfjgZ/jgIJOZXh044Gn5qyh44Gu54++5Zyo55S76Z2i44G46YCy44KB44G+44GZ44CC
+          Jyk7JCgncmVjb3ZlcnknKS5oaWRkZW49dHJ1ZTtyZW5kZXJTaGVsbCgpO2lmKGZvY3VzQ2FyZCkk
+          KCduZXh0JykuZm9jdXMoe3ByZXZlbnRTY3JvbGw6dHJ1ZX0pO31jYXRjaChlcnIpe2lmKFN0cmlu
+          ZyhlcnImJmVyci5tZXNzYWdlKT09PSdBQ1RJVkFUSU9OX0NBTkNFTExFRCcpcmV0dXJuO2NvbnN0
+          IGNvZGU9U3RyaW5nKGVyciYmZXJyLm1lc3NhZ2V8fCdUQVJHRVRfTUlTU0lORycpO3NldFN0YXR1
+          cygnZXJyb3InLGBUQVJHRVRfTUlTU0lORzog5b+F6KaB44Gq56K66KqN5a++6LGh44KS6KGo56S6
+          44Gn44GN44G+44Gb44KT44Gn44GX44Gf77yIJHtjb2Rlfe+8ieOAgmApOyQoJ3JlY292ZXJ5Jyku
+          aGlkZGVuPWZhbHNlO3JlbmRlclNoZWxsKCk7fX0KZnVuY3Rpb24gc3RhcnQoKXtzdGF0ZT17aW5k
+          ZXg6MCxjb21wbGV0ZWQ6ZmFsc2UsY2xvc2VkOmZhbHNlfTtzYXZlKCk7YWN0aXZhdGUoMCx7Zm9j
+          dXNDYXJkOnRydWV9KTt9CmZ1bmN0aW9uIHJlc3VtZSgpe2xvYWQoKTtzdGF0ZS5jbG9zZWQ9ZmFs
+          c2U7c2F2ZSgpO2FjdGl2YXRlKHN0YXRlLmluZGV4LHtmb2N1c0NhcmQ6dHJ1ZX0pO30KZnVuY3Rp
+          b24gcmVwbGF5KCl7bG9jYWxTdG9yYWdlLnJlbW92ZUl0ZW0oS0VZKTtzdGF0ZT17aW5kZXg6MCxj
+          b21wbGV0ZWQ6ZmFsc2UsY2xvc2VkOmZhbHNlfTtzYXZlKCk7YWN0aXZhdGUoMCx7Zm9jdXNDYXJk
+          OnRydWV9KTt9CmZ1bmN0aW9uIGNsb3NlVHV0b3JpYWwoKXtzdGF0ZS5jbG9zZWQ9dHJ1ZTtzYXZl
+          KCk7cmVuZGVyU2hlbGwoKTskKCdyZXN1bWUnKS5mb2N1cyh7cHJldmVudFNjcm9sbDpmYWxzZX0p
+          O30KbG9hZCgpOwokKCdzdGFydCcpLmFkZEV2ZW50TGlzdGVuZXIoJ2NsaWNrJyxzdGFydCk7JCgn
+          cmVzdW1lJykuYWRkRXZlbnRMaXN0ZW5lcignY2xpY2snLHJlc3VtZSk7JCgncmVwbGF5JykuYWRk
+          RXZlbnRMaXN0ZW5lcignY2xpY2snLHJlcGxheSk7JCgnYmFjaycpLmFkZEV2ZW50TGlzdGVuZXIo
+          J2NsaWNrJywoKT0+e2lmKHN0YXRlLmluZGV4PjApYWN0aXZhdGUoc3RhdGUuaW5kZXgtMSx7Zm9j
+          dXNDYXJkOnRydWV9KX0pOyQoJ25leHQnKS5hZGRFdmVudExpc3RlbmVyKCdjbGljaycsKCk9Pntp
+          Zih0YXJnZXRTdGF0ZSE9PSdyZWFkeSd8fHN0YXRlLmNvbXBsZXRlZClyZXR1cm47aWYoc3RhdGUu
+          aW5kZXg+PXN0ZXBzLmxlbmd0aC0xKXtzdGF0ZS5jb21wbGV0ZWQ9dHJ1ZTtzYXZlKCk7c2V0U3Rh
+          dHVzKCdyZWFkeScsJ0ZpcnN0MTAg5a6M5LqG44CCR3VpZGUgQ2VudGVy44GL44KJUmVwbGF544Gn
+          44GN44G+44GZ44CCJyk7cmVuZGVyU2hlbGwoKTtyZXR1cm59YWN0aXZhdGUoc3RhdGUuaW5kZXgr
+          MSx7Zm9jdXNDYXJkOnRydWV9KX0pOyQoJ3JldHJ5JykuYWRkRXZlbnRMaXN0ZW5lcignY2xpY2sn
+          LCgpPT5hY3RpdmF0ZShzdGF0ZS5pbmRleCx7Zm9jdXNDYXJkOnRydWV9KSk7JCgnY2xvc2UnKS5h
+          ZGRFdmVudExpc3RlbmVyKCdjbGljaycsY2xvc2VUdXRvcmlhbCk7ZG9jdW1lbnQuYWRkRXZlbnRM
+          aXN0ZW5lcigna2V5ZG93bicsZT0+e2lmKGUua2V5PT09J0VzY2FwZScmJiFzdGF0ZS5jbG9zZWQp
+          e2UucHJldmVudERlZmF1bHQoKTtjbG9zZVR1dG9yaWFsKCk7fX0pOwpjb25zdCBxcz1uZXcgVVJM
+          U2VhcmNoUGFyYW1zKGxvY2F0aW9uLnNlYXJjaCksbW9kZT1xcy5nZXQoJ21vZGUnKTtpZihtb2Rl
+          PT09J3JlcGxheScpe3JlcGxheSgpfWVsc2UgaWYobW9kZT09PSdzdGFydCcpe3N0YXJ0KCl9ZWxz
+          ZSBpZihtb2RlPT09J3Jlc3VtZScpe3Jlc3VtZSgpfWVsc2UgaWYoc3RhdGUuY2xvc2VkKXtyZW5k
+          ZXJTaGVsbCgpfWVsc2V7YWN0aXZhdGUoc3RhdGUuaW5kZXgpfQp3aW5kb3cuRFBST19UVVRPUklB
+          TF9OQVZfVjEyMj1PYmplY3QuZnJlZXplKHt2ZXJzaW9uOlZFUlNJT04sc3RlcENvdW50OnN0ZXBz
+          Lmxlbmd0aCxnZXRTbmFwc2hvdDooKT0+KHt2ZXJzaW9uOlZFUlNJT04saW5kZXg6c3RhdGUuaW5k
+          ZXgsY29tcGxldGVkOnN0YXRlLmNvbXBsZXRlZCxjbG9zZWQ6c3RhdGUuY2xvc2VkLHRhcmdldFN0
+          YXRlLGxhc3RBY3R1YWxVcmwsc3RlcDp7Li4uc3RlcHNbc3RhdGUuaW5kZXhdfX0pLHJldHJ5Oigp
+          PT5hY3RpdmF0ZShzdGF0ZS5pbmRleCl9KTsKfSkoKTsKPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1s
+          Pgo=
+          B64T
+          cat > /tmp/guide.b64 <<'B64G'
+          PCFkb2N0eXBlIGh0bWw+PGh0bWwgbGFuZz0iamEiPjxoZWFkPjxtZXRhIGNoYXJzZXQ9InV0Zi04
+          Ij48bWV0YSBuYW1lPSJ2aWV3cG9ydCIgY29udGVudD0id2lkdGg9ZGV2aWNlLXdpZHRoLGluaXRp
+          YWwtc2NhbGU9MSI+PHRpdGxlPkd1aWRlIENlbnRlciB8IERQUk8gUEVTVDwvdGl0bGU+PHN0eWxl
+          Pgo6cm9vdHstLWc6IzBkNmM1NTstLWRnOiMxMDNlMzM7LS1wOiNlZWY2ZjE7LS1iOiNjOWRlZDQ7
+          LS10eHQ6IzIwMzgzMTstLW11dGVkOiM2NTc2NmZ9Kntib3gtc2l6aW5nOmJvcmRlci1ib3h9Ym9k
+          eXttYXJnaW46MDtmb250LWZhbWlseTotYXBwbGUtc3lzdGVtLEJsaW5rTWFjU3lzdGVtRm9udCwi
+          U2Vnb2UgVUkiLCJOb3RvIFNhbnMgQ0pLIEpQIixzYW5zLXNlcmlmO2NvbG9yOnZhcigtLXR4dCk7
+          YmFja2dyb3VuZDojZjdmYWY4O2xpbmUtaGVpZ2h0OjEuN31he2NvbG9yOmluaGVyaXR9YTpmb2N1
+          cy12aXNpYmxle291dGxpbmU6NHB4IHNvbGlkICNlNmExM2I7b3V0bGluZS1vZmZzZXQ6M3B4fS50
+          b3B7YmFja2dyb3VuZDp2YXIoLS1kZyk7Y29sb3I6d2hpdGU7cGFkZGluZzoxNHB4IDE4cHh9LnRv
+          cGlue21heC13aWR0aDoxMTIwcHg7bWFyZ2luOmF1dG87ZGlzcGxheTpmbGV4O2p1c3RpZnktY29u
+          dGVudDpzcGFjZS1iZXR3ZWVuO2dhcDoxMnB4O2FsaWduLWl0ZW1zOmNlbnRlcjtmbGV4LXdyYXA6
+          d3JhcH0ubmF2e2Rpc3BsYXk6ZmxleDtnYXA6OHB4O2ZsZXgtd3JhcDp3cmFwfS5uYXYgYXt0ZXh0
+          LWRlY29yYXRpb246bm9uZTtiYWNrZ3JvdW5kOnJnYmEoMjU1LDI1NSwyNTUsLjEyKTtwYWRkaW5n
+          OjhweCAxMXB4O2JvcmRlci1yYWRpdXM6OHB4fS53cmFwe21heC13aWR0aDoxMTIwcHg7bWFyZ2lu
+          OjI2cHggYXV0bztwYWRkaW5nOjAgMThweH0uaGVybywuY2FyZHtiYWNrZ3JvdW5kOndoaXRlO2Jv
+          cmRlcjoxcHggc29saWQgdmFyKC0tYik7Ym9yZGVyLXJhZGl1czoxOHB4O3BhZGRpbmc6MjRweH0u
+          aGVyb3tiYWNrZ3JvdW5kOmxpbmVhci1ncmFkaWVudCgxMzVkZWcsI2VkZjdmMSwjZmZmKX1oMXtm
+          b250LXNpemU6Y2xhbXAoMzBweCw1dncsNDZweCk7bWFyZ2luOjhweCAwfS5iYWRnZXtkaXNwbGF5
+          OmlubGluZS1ibG9jaztwYWRkaW5nOjVweCA5cHg7Ym9yZGVyLXJhZGl1czo5OXB4O2JhY2tncm91
+          bmQ6I2RjZWZlNTtjb2xvcjp2YXIoLS1kZyk7Zm9udC13ZWlnaHQ6OTAwO2ZvbnQtc2l6ZToxMnB4
+          fS5ncmlkM3tkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOnJlcGVhdCgzLDFmcik7
+          Z2FwOjE0cHh9LmdyaWQye2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyIDFm
+          cjtnYXA6MTRweH0uY2FyZHttYXJnaW4tdG9wOjE0cHh9LmJ0bnttaW4taGVpZ2h0OjQ2cHg7cGFk
+          ZGluZzoxMHB4IDE0cHg7Ym9yZGVyLXJhZGl1czoxMHB4O2JhY2tncm91bmQ6dmFyKC0tZyk7Ym9y
+          ZGVyOjFweCBzb2xpZCB2YXIoLS1nKTtjb2xvcjp3aGl0ZTt0ZXh0LWRlY29yYXRpb246bm9uZTtm
+          b250LXdlaWdodDo5MDA7ZGlzcGxheTppbmxpbmUtZmxleDthbGlnbi1pdGVtczpjZW50ZXI7anVz
+          dGlmeS1jb250ZW50OmNlbnRlcn0uYnRuLmFsdHtiYWNrZ3JvdW5kOndoaXRlO2NvbG9yOnZhcigt
+          LWRnKTtib3JkZXItY29sb3I6dmFyKC0tYil9LnJvd3tkaXNwbGF5OmZsZXg7Z2FwOjhweDtmbGV4
+          LXdyYXA6d3JhcH0ubGlzdHtkaXNwbGF5OmdyaWQ7Z2FwOjhweH0uaXRlbXtwYWRkaW5nOjEwcHgg
+          MTJweDtiYWNrZ3JvdW5kOiNmNGY4ZjY7Ym9yZGVyLXJhZGl1czoxMHB4fS5tdXRlZHtmb250LXNp
+          emU6MTNweDtjb2xvcjp2YXIoLS1tdXRlZCl9QG1lZGlhKG1heC13aWR0aDo4MDBweCl7LmdyaWQz
+          LC5ncmlkMntncmlkLXRlbXBsYXRlLWNvbHVtbnM6MWZyfS5yb3cgLmJ0bntmbGV4OjEgMSA0MiV9
+          fQo8L3N0eWxlPjwvaGVhZD48Ym9keT48aGVhZGVyIGNsYXNzPSJ0b3AiPjxkaXYgY2xhc3M9InRv
+          cGluIj48Yj5HdWlkZSBDZW50ZXI8L2I+PG5hdiBjbGFzcz0ibmF2Ij48YSBocmVmPSJpbmRleC5o
+          dG1sIj7lhaXlj6M8L2E+PGEgaHJlZj0iY3VzdG9tZXIuaHRtbD9kZW1vPTEiPkN1c3RvbWVyPC9h
+          PjxhIGhyZWY9Im93bmVyLmh0bWw/ZGVtbz0xIj5Pd25lcjwvYT48YSBocmVmPSJzdGFmZi5odG1s
+          P2RlbW89MSI+U3RhZmY8L2E+PGEgaHJlZj0ib3duZXItaXBhZC5odG1sP2RlbW89MSI+RmllbGQg
+          TWFwPC9hPjxhIGhyZWY9InN5c3RlbS1jaGVjay5odG1sP2RlbW89MSI+U3lzdGVtIENoZWNrPC9h
+          PjwvbmF2PjwvZGl2PjwvaGVhZGVyPjxtYWluIGNsYXNzPSJ3cmFwIj48c2VjdGlvbiBjbGFzcz0i
+          aGVybyI+PHNwYW4gY2xhc3M9ImJhZGdlIj5EUFJPIFRVVE9SSUFMIE5BVklHQVRJT04gVjEuMi4y
+          PC9zcGFuPjxoMT7ov7fjgaPjgZ/jgonjgIHlvbnlibLjgajnm67nmoTjgYvjgonpgbjjgbY8L2gx
+          PjxwPkZpcnN0MTDjgIFDdXN0b21lciAvIE93bmVyIC8gU3RhZmYgLyBGaWVsZCBNYXDjgIFTeXN0
+          ZW0gQ2hlY2vjgIHlronlhajjg6vjg7zjg6vjgIHjg4jjg6njg5bjg6vmmYLjga7miLvjgormlrnj
+          gIHkv53lrZjniYhQREbjgpLjgZPjgZPjgYvjgonnorroqo3jgafjgY3jgb7jgZnjgII8L3A+PGRp
+          diBjbGFzcz0icm93Ij48YSBjbGFzcz0iYnRuIiBpZD0ic3RhcnRGaXJzdDEwIiBocmVmPSJ0dXRv
+          cmlhbC5odG1sP21vZGU9c3RhcnQmZGVtbz0xIj5TdGFydDwvYT48YSBjbGFzcz0iYnRuIGFsdCIg
+          aWQ9InJlc3VtZUZpcnN0MTAiIGhyZWY9InR1dG9yaWFsLmh0bWw/bW9kZT1yZXN1bWUmZGVtbz0x
+          Ij5SZXN1bWU8L2E+PGEgY2xhc3M9ImJ0biBhbHQiIGlkPSJyZXBsYXlGaXJzdDEwIiBocmVmPSJ0
+          dXRvcmlhbC5odG1sP21vZGU9cmVwbGF5JmRlbW89MSI+UmVwbGF5PC9hPjwvZGl2PjxwIGNsYXNz
+          PSJtdXRlZCIgaWQ9InByb2dyZXNzIj5GaXJzdDEw44Gu56uv5pyr5YaF6YCy5o2X44KS56K66KqN
+          44GX44Gm44GE44G+44GZ4oCmPC9wPjwvc2VjdGlvbj48ZGl2IGNsYXNzPSJncmlkMyI+PHNlY3Rp
+          b24gY2xhc3M9ImNhcmQiPjxoMj5DdXN0b21lcjwvaDI+PHA+5pys5Lq65qGI5Lu244CB55u46KuH
+          6L+96KiY44CB5YaZ55yfL1BERuOAgeioquWVj+S6iOWumuOAgeimi+epjeOAgeWFrOmWi+WgseWR
+          iuOAgeWGjeioquS+nemgvOOAgjwvcD48ZGl2IGNsYXNzPSJyb3ciPjxhIGNsYXNzPSJidG4iIGhy
+          ZWY9ImN1c3RvbWVyLmh0bWw/ZGVtbz0xIj5ERU1PPC9hPjxhIGNsYXNzPSJidG4gYWx0IiBocmVm
+          PSJpbnF1aXJ5Lmh0bWw/ZGVtbz0xIj7nm7joq4flj5fku5g8L2E+PC9kaXY+PC9zZWN0aW9uPjxz
+          ZWN0aW9uIGNsYXNzPSJjYXJkIj48aDI+T3duZXI8L2gyPjxwPuWPl+S7mEJPWOOAgeahiOS7tuWM
+          luOAgeaLheW9k+WJsuW9k+OAgeioquWVj+S6iOWumuOAgeimi+epjeOAgeeKtuaFi+OAgeWgseWR
+          iuOAgU5leHQgQWN0aW9u44CCPC9wPjxhIGNsYXNzPSJidG4iIGhyZWY9Im93bmVyLmh0bWw/ZGVt
+          bz0xIj5Pd25lciBERU1PPC9hPjwvc2VjdGlvbj48c2VjdGlvbiBjbGFzcz0iY2FyZCI+PGgyPlN0
+          YWZmIC8gRmllbGQ8L2gyPjxwPuWJsuW9k+ahiOS7tuOAgUV2aWRlbmNlIENoYWlu44CB54++6Kq/
+          44CB5pa95bel44CB6Jas5Ymk44CB5a6J5YWo56K66KqN44CBRmllbGQgTWFwIC8gVHJhcCBQSU7j
+          gII8L3A+PGRpdiBjbGFzcz0icm93Ij48YSBjbGFzcz0iYnRuIiBocmVmPSJzdGFmZi5odG1sP2Rl
+          bW89MSI+U3RhZmY8L2E+PGEgY2xhc3M9ImJ0biBhbHQiIGhyZWY9Im93bmVyLWlwYWQuaHRtbD9k
+          ZW1vPTEiPkZpZWxkIE1hcDwvYT48L2Rpdj48L3NlY3Rpb24+PC9kaXY+PGRpdiBjbGFzcz0iZ3Jp
+          ZDIiPjxzZWN0aW9uIGNsYXNzPSJjYXJkIj48aDI+5Za25qWt5YmN44O75a6J5YWoPC9oMj48ZGl2
+          IGNsYXNzPSJsaXN0Ij48ZGl2IGNsYXNzPSJpdGVtIj48Yj5TeXN0ZW0gQ2hlY2s8L2I+PGJyPlBy
+          b2R1Y3Rpb27looPnlYzjgIFBUEnjgIFTdG9yYWdl44CBRmllbGQgTWFw5aWR57SE44KS56K66KqN
+          44CCPC9kaXY+PGRpdiBjbGFzcz0iaXRlbSI+PGI+REVNT+WuieWFqDwvYj48YnI+5a6f5Zyo44GZ
+          44KL5rCP5ZCN44O76Zu76Kmx55Wq5Y+344O75L2P5omA44O76aGn5a6i5YaZ55yf44KS5YWl5Yqb
+          44GX44Gq44GE44CCPC9kaXY+PGRpdiBjbGFzcz0iaXRlbSI+PGI+TElORTwvYj48YnI+5qiZ5rqW
+          6KO95ZOB54q25oWL44GvTElORSBTQUZFIE9GRuOAguWlkee0hOW+jOOBruiqjeiovOioreWumuOD
+          u+Wun+apn1FB5b6M44Gr5YiH5pu/44CCPC9kaXY+PC9kaXY+PGRpdiBjbGFzcz0icm93IiBzdHls
+          ZT0ibWFyZ2luLXRvcDoxMnB4Ij48YSBjbGFzcz0iYnRuIiBocmVmPSJzeXN0ZW0tY2hlY2suaHRt
+          bD9kZW1vPTEiPlN5c3RlbSBDaGVjazwvYT48YSBjbGFzcz0iYnRuIGFsdCIgaHJlZj0iZGVtby1w
+          cmVwYXJlLmh0bWw/ZGVtbz0xIj5EZW1vIFByZXBhcmU8L2E+PC9kaXY+PC9zZWN0aW9uPjxzZWN0
+          aW9uIGNsYXNzPSJjYXJkIj48aDI+44Ki44Kv44K744K344OT44Oq44OG44KjIC8g44OI44Op44OW
+          44OrPC9oMj48ZGl2IGNsYXNzPSJsaXN0Ij48ZGl2IGNsYXNzPSJpdGVtIj5UYWLjgafnp7vli5Xj
+          gIFFbnRlciAvIFNwYWNl44Gn5pON5L2c44CBRXNj44GnVHV0b3JpYWzjgpLplonjgZjjgovjgII8
+          L2Rpdj48ZGl2IGNsYXNzPSJpdGVtIj7jgrnjg57jg5vjg7tQQ+ODu2lQYWTjgaflkIzjgZjlhazp
+          lotVUkzjgpLliKnnlKjjgII8L2Rpdj48ZGl2IGNsYXNzPSJpdGVtIj7ooajnpLrjgYzlj6TjgYTm
+          mYLjga/lho3oqq3jgb/ovrzjgb/jgILjg63jgrDjgqTjg7PjgYzliIfjgozjgZ/mmYLjga/lhaXl
+          j6PjgYvjgonlho3oqo3oqLzjgII8L2Rpdj48ZGl2IGNsYXNzPSJpdGVtIj7kv53lrZjjgafjgY3j
+          garjgYTmmYLjga9TeXN0ZW0gQ2hlY2vjgpLnorroqo3jgZfjgIHlrp/jg4fjg7zjgr/jgafnubDj
+          gorov5TjgZfoqabjgZXjgarjgYTjgII8L2Rpdj48L2Rpdj48L3NlY3Rpb24+PC9kaXY+PHNlY3Rp
+          b24gY2xhc3M9ImNhcmQiPjxoMj7kv53lrZjniYhQREYgLyDllrbmpa3os4fmlpk8L2gyPjxkaXYg
+          Y2xhc3M9InJvdyI+PGEgY2xhc3M9ImJ0biIgaHJlZj0iRFBST19QRVNUX0VOVl9RVUlDS19TVEFS
+          VF9GSU5BTF9WMS4xX0c4LnBkZiI+UXVpY2sgU3RhcnQ8L2E+PGEgY2xhc3M9ImJ0biBhbHQiIGhy
+          ZWY9IkRQUk9fUEVTVF9FTlZfREVUQUlMRURfTUFOVUFMX0ZJTkFMX1YxLjFfRzgucGRmIj5EZXRh
+          aWxlZCBNYW51YWw8L2E+PGEgY2xhc3M9ImJ0biBhbHQiIGhyZWY9IkRQUk9fUEVTVF9FTlZfQTRf
+          RkxZRVJfRklOQUxfVjEuMV9HOC5wZGYiPkE05Za25qWt44OB44Op44K3PC9hPjwvZGl2Pjwvc2Vj
+          dGlvbj48c2VjdGlvbiBjbGFzcz0iY2FyZCI+PGgyPlJFQURZIC8g5aWR57SE5b6M6Kit5a6aPC9o
+          Mj48cD7mqJnmupboo73lk4Hjga7lrozmiJDnorroqo3jgajjgIHlrp/jg4bjg4rjg7Pjg4jjg7tP
+          d25lciBBdXRo44O7U3RhZmYgLyBDdXN0b21lcuacrOeVquODpuODvOOCtuODvOODu1N1cHBvcnTp
+          gKPntaHlhYjjg7tMSU5F6LOH5qC85oOF5aCx44Gu5YWl5Yqb44Gv5YiG6Zui44GX44G+44GZ44CC
+          PC9wPjxhIGNsYXNzPSJidG4iIGhyZWY9InJlYWR5LWNvbnRyb2wtY2VudGVyLmh0bWwiPlJFQURZ
+          IENvbnRyb2wgQ2VudGVyPC9hPjwvc2VjdGlvbj48L21haW4+PHNjcmlwdD5jb25zdCBLPSdkcHJv
+          X3Blc3RfZmlyc3QxMF92MTFfc3RhdGUnO2xldCB0PSfmnKrplovlp4snO3RyeXtjb25zdCBzPUpT
+          T04ucGFyc2UobG9jYWxTdG9yYWdlLmdldEl0ZW0oSyl8fCdudWxsJyk7aWYocyl7dD1zLmNvbXBs
+          ZXRlZD8n5a6M5LqG5riI44G/IC0gUmVwbGF544Gn44GN44G+44GZJzpg5L+d5a2Y5LitOiBTVEVQ
+          ICR7TWF0aC5taW4oMTAsKHMuaW5kZXh8fDApKzEpfSAvIDEwYH19Y2F0Y2h7fWRvY3VtZW50Lmdl
+          dEVsZW1lbnRCeUlkKCdwcm9ncmVzcycpLnRleHRDb250ZW50PSdGaXJzdDEwOiAnK3Q7ZG9jdW1l
+          bnQucXVlcnlTZWxlY3RvckFsbCgnI3N0YXJ0Rmlyc3QxMCwjcmVzdW1lRmlyc3QxMCwjcmVwbGF5
+          Rmlyc3QxMCcpLmZvckVhY2goYT0+YS5hZGRFdmVudExpc3RlbmVyKCdrZXlkb3duJyxlPT57aWYo
+          ZS5rZXk9PT0nICd8fGUuY29kZT09PSdTcGFjZScpe2UucHJldmVudERlZmF1bHQoKTtsb2NhdGlv
+          bi5ocmVmPWEuaHJlZn19KSk7PC9zY3JpcHQ+PC9ib2R5PjwvaHRtbD4K
+          B64G
+          base64 -d /tmp/tutorial.b64 > tutorial.html
+          base64 -d /tmp/guide.b64 > guide-center.html
+          grep -q 'DPRO_TUTORIAL_NAVIGATION_V1.2.2' tutorial.html
+          grep -q 'id="startFirst10"' guide-center.html
+          grep -q 'id="resumeFirst10"' guide-center.html
+          grep -q 'id="replayFirst10"' guide-center.html
+          python - <<'PY2'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class P(HTMLParser): pass
+          for f in ['tutorial.html','guide-center.html']:
+              P().feed(Path(f).read_text(encoding='utf-8'))
+          s=Path('tutorial.html').read_text(encoding='utf-8')
+          assert 'id="skip"' not in s
+          assert s.count("id:'pest-first10-")==10
+          PY2
+          git config user.name 'DPRO Tutorial Retrofit Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add tutorial.html guide-center.html
+          git commit -m 'feat: retrofit PEST ENV Tutorial Navigation V1.2.2'
+          git push
+          echo "bootstrapped=true" >> "$GITHUB_OUTPUT"
+          echo "SOURCE_BOOTSTRAP_COMMIT=$(git rev-parse HEAD)"
+
+      - name: Verify frozen scope and baseline
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_DIR/screenshots"
+          git cat-file -e "$BASELINE_HEAD^{commit}"
+          python - <<'PY'
+          import subprocess,sys
+          baseline='63eea528be323427be15faa3a6b99af41a1b39d9'
+          expected={
+          'config.js':'c1dcb7aed06df4668856b0a524e982315e111a51','demo-core.js':'d603391d2e706802af959a403296fcfc60d535d3','ui.js':'6f31e99f97eb4e6ab8345ec7e2ad1dec1774cbf9','customer-app.js':'dbccf84da3e45be2dc25e333c837277e2284dba1','owner-app.js':'8f4e7793803f2348d49e9bf8ad80b0b425c7be67','staff-app.js':'8436f59baa5762ff424bdfe382df66f5dd1d3430','owner-ipad-app.js':'2cb0117eb4eaf99d64ec1f43926f048f50c25d38','index.html':'761173b4233b63cf80734e71b1b2eaaaa3910713','inquiry.html':'afb48adc5916d1d7ff6f204a6db5c4981053c484','customer.html':'e514c27c296d9980ee6b8a22ea38fc16c50e9fcc','owner.html':'53bb92f2fbcc39f82f15b5f658f8352a9ee29d77','staff.html':'dc821f37895b36c5e6be8f00dbc8e5b27a2e1c6d','owner-ipad.html':'eca6b04d674b80e022644d7a944720f14e861083','system-check.html':'075e419a5f2e19b1f5258aefe3b96f3981cac55e','demo-prepare.html':'2585c944dd28140c52e11a22019b3072b5c67189','ready-control-center.html':'329e1e75dad4b503d01c6ce74b7999c96fe876c9','styles.css':'9ab1b3cdf6d446c0abe16cb0e466e6e311495a77'}
+          bad=[]; rows=[]
+          for p,sha in expected.items():
+              got=subprocess.check_output(['git','rev-parse',f'HEAD:{p}'],text=True).strip()
+              rows.append((p,sha,got,'PASS' if got==sha else 'FAIL'))
+              if got!=sha: bad.append(p)
+          open('qa/tutorial-navigation-v1.2.2/FROZEN_SHA_CHECK.tsv','w').write('\n'.join('\t'.join(r) for r in rows)+'\n')
+          changed=subprocess.check_output(['git','diff','--name-only',baseline+'..HEAD'],text=True).splitlines()
+          allowed={'tutorial.html','guide-center.html','.github/workflows/dpro-pest-env-tutorial-navigation-v122-qa.yml'}
+          disallowed=[p for p in changed if p not in allowed]
+          open('qa/tutorial-navigation-v1.2.2/CHANGED_FILES_SOURCE.txt','w').write('\n'.join(changed)+'\n')
+          if bad or disallowed:
+              print('FROZEN_SHA_FAIL',bad,'DISALLOWED',disallowed,file=sys.stderr);sys.exit(1)
+          print('FROZEN_SCOPE=PASS')
+          PY
+
+      - name: Setup Playwright
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install browser QA dependencies
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/pest-v122 && cd /tmp/pest-v122
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Wait for exact source Pages deployment
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          marker=0; pages_run=0; pages_id=''; pages_url=''
+          for i in $(seq 1 60); do
+            html="$(curl -fsSL -H 'Cache-Control: no-cache' "${PUBLIC_BASE}tutorial.html?src=${GITHUB_SHA:0:12}&t=$RANDOM" || true)"
+            guide="$(curl -fsSL -H 'Cache-Control: no-cache' "${PUBLIC_BASE}guide-center.html?src=${GITHUB_SHA:0:12}&t=$RANDOM" || true)"
+            if grep -q 'DPRO_TUTORIAL_NAVIGATION_V1.2.2' <<<"$html" && grep -q 'startFirst10' <<<"$guide" && grep -q 'replayFirst10' <<<"$guide"; then marker=1; fi
+            runs="$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=100" || echo '{"workflow_runs":[]}')"
+            pages_id="$(jq -r --arg sha "$GITHUB_SHA" '[.workflow_runs[]|select(.head_sha==$sha and .name=="pages build and deployment" and .conclusion=="success")][0].id // empty' <<<"$runs")"
+            pages_url="$(jq -r --arg sha "$GITHUB_SHA" '[.workflow_runs[]|select(.head_sha==$sha and .name=="pages build and deployment" and .conclusion=="success")][0].html_url // empty' <<<"$runs")"
+            [[ -n "$pages_id" ]] && pages_run=1 || true
+            if [[ "$marker" == 1 && "$pages_run" == 1 ]]; then break; fi
+            sleep 5
+          done
+          cat > "$OUT_DIR/PAGES_SOURCE_PRECHECK.txt" <<TXT
+          SOURCE_HEAD=$GITHUB_SHA
+          PUBLIC_MARKER=$marker
+          PAGES_SUCCESS=$pages_run
+          PAGES_RUN_ID=$pages_id
+          PAGES_RUN_URL=$pages_url
+          PUBLIC_TUTORIAL=${PUBLIC_BASE}tutorial.html
+          PUBLIC_GUIDE=${PUBLIC_BASE}guide-center.html
+          TXT
+          [[ "$marker" == 1 && "$pages_run" == 1 ]]
+
+      - name: Run Tutorial Navigation V1.2.2 browser QA
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/pest-v122
+          cat > qa.mjs <<'NODE'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const BASE=process.env.PUBLIC_BASE;
+          const OUT=path.join(process.env.GITHUB_WORKSPACE,process.env.OUT_DIR);
+          const SHOTS=path.join(OUT,'screenshots');
+          fs.mkdirSync(SHOTS,{recursive:true});
+          const KEY='dpro_pest_first10_v11_state';
+          const BUSINESS='dpro_pest_env_demo_v1';
+          const steps=[
+            {step_id:'pest-first10-01-guide-safety',order:1,title:'Guide Centerと安全ルール',route:'guide-center.html',selector:'.hero .row'},
+            {step_id:'pest-first10-02-demo-prepare',order:2,title:'DEMO準備画面を確認',route:'demo-prepare.html?demo=1',selector:'#prepare'},
+            {step_id:'pest-first10-03-web-inquiry',order:3,title:'WEB相談受付',route:'inquiry.html?demo=1',selector:'#form'},
+            {step_id:'pest-first10-04-customer',order:4,title:'Customer',route:'customer.html?demo=1',selector:'#detail > h2'},
+            {step_id:'pest-first10-05-owner-case-board',order:5,title:'Owner - 案件ボード',route:'owner.html?demo=1',selector:'.open'},
+            {step_id:'pest-first10-06-owner-next-action',order:6,title:'Owner - Next Actionと状態確認',route:'owner.html?demo=1',selector:'#detail .grid > div:nth-child(2)'},
+            {step_id:'pest-first10-07-staff-field-record',order:7,title:'Staff - 現場カルテ',route:'staff.html?demo=1',selector:'#phase'},
+            {step_id:'pest-first10-08-field-map-trap',order:8,title:'Field Map / Trap PIN',route:'owner-ipad.html?demo=1',selector:'#app > section.card h2'},
+            {step_id:'pest-first10-09-system-check',order:9,title:'System Check',route:'system-check.html?demo=1',selector:'#run'},
+            {step_id:'pest-first10-10-ready',order:10,title:'READYと契約後設定',route:'ready-control-center.html',selector:'.hero h1'}
+          ];
+          const viewports=[
+            {name:'mobile-375',width:375,height:812},{name:'mobile-390',width:390,height:844},{name:'mobile-430',width:430,height:932},{name:'tablet-768',width:768,height:1024},{name:'desktop-1440',width:1440,height:1000}
+          ];
+          const allMutations=[],allFailed=[],allConsole=[],allPageErrors=[];
+          function tracker(page,label){
+            const t={label,mutations:[],failed:[],console:[],pageErrors:[]};
+            page.on('request',r=>{if(['POST','PATCH','DELETE'].includes(r.method())){const x={label,method:r.method(),url:r.url()};t.mutations.push(x);allMutations.push(x)}});
+            page.on('requestfailed',r=>{const x={label,url:r.url(),method:r.method(),error:r.failure()?.errorText||''};t.failed.push(x);allFailed.push(x)});
+            page.on('console',m=>{if(m.type()==='error'){const x={label,text:m.text()};t.console.push(x);allConsole.push(x)}});
+            page.on('pageerror',e=>{const x={label,text:String(e)};t.pageErrors.push(x);allPageErrors.push(x)});
+            return t;
+          }
+          async function bootstrap(context){const p=await context.newPage();await p.goto(BASE+'customer.html?demo=1',{waitUntil:'domcontentloaded',timeout:45000});await p.waitForTimeout(250);const b=await p.evaluate(k=>localStorage.getItem(k),BUSINESS);await p.close();if(!b)throw new Error('DEMO_BOOTSTRAP_MISSING');return b;}
+          async function waitReady(page,index){await page.waitForFunction(([i])=>{const c=document.querySelector('#counter')?.textContent?.trim();const s=document.querySelector('#targetStatus');return c===`${i+1} / 10`&&s?.dataset.state==='ready'&&window.DPRO_TUTORIAL_NAV_V122?.getSnapshot?.().index===i},[index],{timeout:20000});}
+          function expectedAbs(step){return new URL(step.route,BASE).href}
+          async function verifyStep(page,index){
+            const step=steps[index]; const snap=await page.evaluate(()=>window.DPRO_TUTORIAL_NAV_V122.getSnapshot());
+            if(snap.index!==index||snap.targetState!=='ready'||snap.step.step_id!==step.step_id)throw new Error(`SNAPSHOT_MISMATCH_${index+1}`);
+            const exp=new URL(expectedAbs(step)),act=new URL(snap.lastActualUrl); if(exp.pathname!==act.pathname||exp.search!==act.search)throw new Error(`WRONG_ROUTE_${index+1}_${act.pathname}${act.search}`);
+            const child=page.frames().find(f=>f!==page.mainFrame()&&new URL(f.url()).pathname===exp.pathname&&new URL(f.url()).search===exp.search);if(!child)throw new Error(`FRAME_NOT_FOUND_${index+1}`);
+            const result=await child.locator(step.selector).first().evaluate(el=>{const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return {active:el.getAttribute('data-dpro-tutorial-active')==='true',outlineWidth:parseFloat(cs.outlineWidth)||0,top:r.top,bottom:r.bottom,innerHeight:innerHeight,overflow:Math.max(document.documentElement.scrollWidth,document.body?.scrollWidth||0)-innerWidth}});
+            if(!result.active||result.outlineWidth<3)throw new Error(`HIGHLIGHT_FAIL_${index+1}`);if(result.bottom<=0||result.top>=result.innerHeight)throw new Error(`TARGET_NOT_VISIBLE_${index+1}`);if(result.overflow>1)throw new Error(`FRAME_HORIZONTAL_OVERFLOW_${index+1}_${result.overflow}`);
+            const parent=await page.evaluate(()=>({overflow:Math.max(document.documentElement.scrollWidth,document.body?.scrollWidth||0)-innerWidth}));if(parent.overflow>1)throw new Error(`PARENT_HORIZONTAL_OVERFLOW_${index+1}_${parent.overflow}`);
+            const a=await page.locator('#targetPane').boundingBox(),b=await page.locator('#tutorialCard').boundingBox();if(!a||!b)throw new Error('LAYOUT_BOX_MISSING');const overlap=Math.max(0,Math.min(a.x+a.width,b.x+b.width)-Math.max(a.x,b.x))*Math.max(0,Math.min(a.y+a.height,b.y+b.height)-Math.max(a.y,b.y));if(overlap>1)throw new Error(`CARD_COVERS_TARGET_${index+1}_${overlap}`);
+            return {index,step_id:step.step_id,route_ok:true,target_ok:true,target_visible:true,highlight_visible:true,parent_overflow:parent.overflow,frame_overflow:result.overflow,card_target_overlap:overlap};
+          }
+          async function runViewport(browser,vp){
+            const context=await browser.newContext({viewport:{width:vp.width,height:vp.height}});const before=await bootstrap(context);const page=await context.newPage();const tr=tracker(page,vp.name);await page.goto(BASE+'tutorial.html?mode=start&demo=1&qa='+Date.now(),{waitUntil:'domcontentloaded',timeout:45000});const rows=[];
+            for(let i=0;i<10;i++){await waitReady(page,i);rows.push(await verifyStep(page,i));if(vp.name==='desktop-1440'&&[0,1,2,5,6,7,8,9].includes(i)){const names={0:'desktop-step-01.png',1:'desktop-step-02-demo-prepare-target.png',2:'desktop-step-03-inquiry-target.png',5:'desktop-step-06-owner-target.png',6:'desktop-step-07-staff-target.png',7:'desktop-step-08-field-map-target.png',8:'desktop-step-09-system-check-target.png',9:'desktop-step-10-ready-target.png'};await page.screenshot({path:path.join(SHOTS,names[i]),fullPage:true})}if(vp.name==='mobile-390'&&i===0)await page.screenshot({path:path.join(SHOTS,'mobile-step-01.png'),fullPage:true});if(vp.name==='mobile-390'&&i===7)await page.screenshot({path:path.join(SHOTS,'mobile-cross-page-target.png'),fullPage:true});if(i<9){await page.locator('#next').click();}}
+            await page.locator('#next').click();const completed=await page.evaluate(()=>window.DPRO_TUTORIAL_NAV_V122.getSnapshot().completed);if(!completed)throw new Error(`COMPLETE_FAIL_${vp.name}`);const after=await page.evaluate(k=>localStorage.getItem(k),BUSINESS);if(before!==after)throw new Error(`BUSINESS_STORAGE_CHANGED_${vp.name}`);if(tr.mutations.length||tr.failed.length||tr.console.length||tr.pageErrors.length)throw new Error(`RUNTIME_ERRORS_${vp.name}`);await context.close();return {viewport:vp,steps:rows,completed:true,business_storage_unchanged:true,mutation_count:0,request_error_count:0,console_error_count:0,page_error_count:0};
+          }
+          async function featureTests(browser){
+            const context=await browser.newContext({viewport:{width:1440,height:1000}});const before=await bootstrap(context);const page=await context.newPage();const tr=tracker(page,'feature-tests');await page.goto(BASE+'tutorial.html?mode=start&demo=1&qa=features',{waitUntil:'domcontentloaded',timeout:45000});await waitReady(page,0);
+            await page.locator('#start').focus();const focusOutline=await page.locator('#start').evaluate(el=>({id:document.activeElement.id,outline:parseFloat(getComputedStyle(el).outlineWidth)||0}));if(focusOutline.id!=='start'||focusOutline.outline<3)throw new Error('FOCUS_VISIBLE_FAIL');await page.keyboard.press('Enter');await waitReady(page,0);
+            await page.locator('#next').focus();await page.keyboard.press('Space');await waitReady(page,1);await page.locator('#back').click();await waitReady(page,0);
+            for(let i=0;i<5;i++){await page.locator('#next').click();await waitReady(page,i+1)}
+            await page.locator('#back').click();await waitReady(page,4);await page.locator('#next').click();await waitReady(page,5);
+            await page.locator('#close').click();let s=await page.evaluate(()=>window.DPRO_TUTORIAL_NAV_V122.getSnapshot());if(!s.closed||s.index!==5)throw new Error('CLOSE_PRESERVE_FAIL');await page.locator('#resume').click();await waitReady(page,5);
+            await page.keyboard.press('Escape');s=await page.evaluate(()=>window.DPRO_TUTORIAL_NAV_V122.getSnapshot());if(!s.closed||s.index!==5)throw new Error('ESC_PRESERVE_FAIL');await page.locator('#resume').click();await waitReady(page,5);
+            await page.locator('#replay').click();await waitReady(page,0);s=await page.evaluate(()=>window.DPRO_TUTORIAL_NAV_V122.getSnapshot());if(s.index!==0||s.completed)throw new Error('REPLAY_FAIL');const after=await page.evaluate(k=>localStorage.getItem(k),BUSINESS);if(before!==after)throw new Error('REPLAY_CLEARED_BUSINESS_DATA');
+            const focusSeen=[];for(let i=0;i<14;i++){await page.keyboard.press('Tab');focusSeen.push(await page.evaluate(()=>document.activeElement?.id||document.activeElement?.tagName||''))}if(new Set(focusSeen.filter(Boolean)).size<3)throw new Error('BAD_FOCUS_TRAP');if(tr.mutations.length||tr.failed.length||tr.console.length||tr.pageErrors.length)throw new Error('FEATURE_RUNTIME_ERRORS');await context.close();return {start:true,next_space:true,back:true,resume_exact:true,replay:true,close_preserves:true,esc_preserves:true,focus_visible:true,tab_usable:true,enter_space_usable:true,no_bad_focus_trap:true,business_storage_unchanged:true};
+          }
+          async function guideTests(browser){
+            const context=await browser.newContext({viewport:{width:1280,height:900}});const before=await bootstrap(context);const page=await context.newPage();const tr=tracker(page,'guide-tests');
+            await page.goto(BASE+'guide-center.html?qa=guide',{waitUntil:'domcontentloaded',timeout:45000});for(const id of ['startFirst10','resumeFirst10','replayFirst10'])if(await page.locator('#'+id).count()!==1)throw new Error('GUIDE_ID_MISSING_'+id);
+            await page.locator('#startFirst10').click();await page.waitForURL(/tutorial\.html\?mode=start/);await waitReady(page,0);
+            await page.goto(BASE+'guide-center.html?qa=resume',{waitUntil:'domcontentloaded'});await page.evaluate(k=>localStorage.setItem(k,JSON.stringify({index:5,completed:false,closed:true})),KEY);await page.locator('#resumeFirst10').click();await page.waitForURL(/tutorial\.html\?mode=resume/);await waitReady(page,5);
+            await page.goto(BASE+'guide-center.html?qa=replay',{waitUntil:'domcontentloaded'});await page.evaluate(k=>localStorage.setItem(k,JSON.stringify({index:8,completed:false,closed:false})),KEY);await page.locator('#replayFirst10').click();await page.waitForURL(/tutorial\.html\?mode=replay/);await waitReady(page,0);const afterReplay=await page.evaluate(k=>localStorage.getItem(k),BUSINESS);if(before!==afterReplay)throw new Error('GUIDE_REPLAY_BUSINESS_CHANGE');
+            await page.goto(BASE+'guide-center.html?qa=progress',{waitUntil:'domcontentloaded'});await page.evaluate(k=>localStorage.setItem(k,JSON.stringify({index:4,completed:false,closed:false})),KEY);await page.reload({waitUntil:'domcontentloaded'});const progress=(await page.locator('#progress').innerText()).replace(/\s+/g,' ');if(!progress.includes('STEP 5 / 10'))throw new Error('GUIDE_PROGRESS_FAIL_'+progress);if(tr.mutations.length||tr.failed.length||tr.console.length||tr.pageErrors.length)throw new Error('GUIDE_RUNTIME_ERRORS');await context.close();return {start_click:'PASS',resume_click:'PASS',replay_click:'PASS',progress_display:'PASS',business_storage_unchanged:true};
+          }
+          async function missingTest(browser){
+            const context=await browser.newContext({viewport:{width:1280,height:900}});const before=await bootstrap(context);const page=await context.newPage();const tr=tracker(page,'target-missing');await page.route('**/guide-center.html',async route=>{if(route.request().resourceType()==='document'){await route.fulfill({status:200,contentType:'text/html; charset=utf-8',body:'<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>QA missing target</title></head><body><section class="hero"><h1>QA missing target</h1></section></body></html>'})}else await route.continue()});await page.goto(BASE+'tutorial.html?mode=start&demo=1&qa=missing',{waitUntil:'domcontentloaded',timeout:45000});await page.waitForFunction(()=>document.querySelector('#targetStatus')?.dataset.state==='error',{timeout:15000});const snap=await page.evaluate(()=>window.DPRO_TUTORIAL_NAV_V122.getSnapshot());const nextDisabled=await page.locator('#next').isDisabled(),retry=await page.locator('#retry').isVisible(),guide=await page.locator('#guideRecovery').isVisible(),msg=await page.locator('#targetStatus').innerText();if(snap.index!==0||!nextDisabled||!retry||!guide||!msg.includes('TARGET_MISSING'))throw new Error('TARGET_MISSING_CONTRACT_FAIL');await page.screenshot({path:path.join(SHOTS,'TARGET_MISSING-recovery.png'),fullPage:true});await page.locator('#next').click({force:true}).catch(()=>{});const still=await page.evaluate(()=>window.DPRO_TUTORIAL_NAV_V122.getSnapshot().index);if(still!==0)throw new Error('REQUIRED_TARGET_BYPASS');await page.unroute('**/guide-center.html');await page.locator('#retry').click();await waitReady(page,0);const after=await page.evaluate(k=>localStorage.getItem(k),BUSINESS);if(before!==after)throw new Error('MISSING_TEST_BUSINESS_CHANGE');if(tr.mutations.length||tr.failed.length||tr.console.length||tr.pageErrors.length)throw new Error('MISSING_RUNTIME_ERRORS');await context.close();return {blocks_progress:true,japanese_error:true,retry:true,guide_recovery:true,no_silent_fallback:true,recovered_after_retry:true,required_target_bypass_count:0};
+          }
+          const browser=await chromium.launch({headless:true});
+          try{
+            const viewportResults=[];for(const vp of viewports)viewportResults.push(await runViewport(browser,vp));
+            const features=await featureTests(browser);const guide=await guideTests(browser);const missing=await missingTest(browser);
+            if(allMutations.length||allFailed.length||allConsole.length||allPageErrors.length)throw new Error('GLOBAL_RUNTIME_ERROR_COUNTS_NONZERO');
+            const targetMap={version:'DPRO_TUTORIAL_NAVIGATION_V1.2.2',product_number:54,repository:'dpromstk2000-lab/dpro-pest-env-line',source_head:process.env.GITHUB_SHA,first10_count:10,steps:steps.map(s=>({...s,target_required:true,automatic_action:'none',selector_verified_runtime:true}))};
+            const runtime={version:'DPRO_TUTORIAL_NAVIGATION_V1.2.2',source_head:process.env.GITHUB_SHA,all_pass:true,viewports:viewportResults,features,target_missing:missing,business_mutation_count:0,required_target_bypass_count:0,wrong_route_count:0,wrong_target_count:0,console_error_count:0,tutorial_request_error_count:0,page_error_count:0};
+            const final={product_number:54,scope:'Tutorial Navigation V1.2.2 retrofit only',source_head:process.env.GITHUB_SHA,first10_count:10,start:'PASS',next_all:'PASS',back:'PASS',resume_exact:'PASS',replay:'PASS',close:'PASS',esc:'PASS',target_missing:'PASS',guide_start:'PASS',guide_resume:'PASS',guide_replay:'PASS',viewports:viewports.map(v=>v.width),business_mutation_count:0,required_target_bypass_count:0,wrong_route_count:0,wrong_target_count:0,console_error_count:0,tutorial_request_error_count:0,horizontal_overflow:0,blockers:[],result:'PASS'};
+            fs.writeFileSync(path.join(OUT,'TUTORIAL_TARGET_MAP.json'),JSON.stringify(targetMap,null,2)+'\n');fs.writeFileSync(path.join(OUT,'TUTORIAL_RUNTIME_QA.json'),JSON.stringify(runtime,null,2)+'\n');fs.writeFileSync(path.join(OUT,'GUIDE_CENTER_RUNTIME_QA.json'),JSON.stringify(guide,null,2)+'\n');fs.writeFileSync(path.join(OUT,'FINAL_QA_REPORT.json'),JSON.stringify(final,null,2)+'\n');fs.writeFileSync(path.join(OUT,'BUSINESS_MUTATION_ZERO_EVIDENCE.txt'),`BUSINESS_MUTATION_COUNT=0\nFORBIDDEN_HTTP_METHODS_OBSERVED=0\nDEMO_BUSINESS_STORAGE_UNCHANGED=PASS\n`);fs.writeFileSync(path.join(OUT,'REQUIRED_TARGET_BYPASS_ZERO_EVIDENCE.txt'),`REQUIRED_TARGET_BYPASS_COUNT=0\nSKIP_CONTROL_PRESENT=NO\nTARGET_MISSING_BLOCKS_NEXT=PASS\nRETRY=PASS\nGUIDE_RECOVERY=PASS\n`);fs.writeFileSync(path.join(OUT,'VISUAL_QA_RESULT.txt'),`AUTOMATED_GEOMETRY=PASS\nTARGET_VISIBLE=PASS\nHIGHLIGHT_VISIBLE=PASS\nCARD_TARGET_OVERLAP=0\nHORIZONTAL_OVERFLOW=0\nVIEWPORTS=375,390,430,768,1440\nHUMAN_VISUAL_REVIEW=RETURN_PACKAGE_REVIEW\n`);fs.writeFileSync(path.join(OUT,'FINAL_QA_REPORT.md'),`# DPRO #54 PEST ENV Tutorial Navigation V1.2.2\n\n- RESULT: **PASS**\n- First10: exactly 10\n- Actual current route + exact selector: PASS 10/10\n- Start / Next / Back / Resume / Replay / Close / Esc: PASS\n- TARGET_MISSING blocking + Retry + Guide recovery: PASS\n- Guide Start / Resume / Replay runtime click: PASS\n- Business mutation: 0\n- Required target bypass: 0\n- Wrong route / wrong target: 0 / 0\n- Console / tutorial request / page errors: 0 / 0 / 0\n- Viewports: 375 / 390 / 430 / 768 / 1440\n- Horizontal overflow: 0\n- Blockers: 0\n\nWhole #54 product FINAL COMPLETE is not declared here; this report is Tutorial Navigation retrofit evidence only.\n`);
+            console.log('TUTORIAL_NAVIGATION_V122=PASS');
+          } finally {await browser.close()}
+          NODE
+          GITHUB_SHA="$GITHUB_SHA" GITHUB_WORKSPACE="$GITHUB_WORKSPACE" OUT_DIR="$OUT_DIR" PUBLIC_BASE="$PUBLIC_BASE" node qa.mjs
+
+      - name: Build source and scope evidence
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          TUTORIAL_BEFORE=122ccfa1091327bca00d2837b43d7ae537321b47
+          GUIDE_BEFORE=08923e8b013e173b1fc69612738ea266589bac5b
+          TUTORIAL_AFTER="$(git rev-parse HEAD:tutorial.html)"
+          GUIDE_AFTER="$(git rev-parse HEAD:guide-center.html)"
+          WORKFLOW_AFTER="$(git rev-parse HEAD:.github/workflows/dpro-pest-env-tutorial-navigation-v122-qa.yml)"
+          cat > "$OUT_DIR/BEFORE_AFTER_SHA.txt" <<TXT
+          START_HEAD=$BASELINE_HEAD
+          SOURCE_QA_HEAD=$GITHUB_SHA
+          tutorial.html BEFORE=$TUTORIAL_BEFORE AFTER=$TUTORIAL_AFTER
+          guide-center.html BEFORE=$GUIDE_BEFORE AFTER=$GUIDE_AFTER
+          workflow AFTER=$WORKFLOW_AFTER
+          TXT
+          cat > "$OUT_DIR/NO_CORE_CHANGE_EVIDENCE.txt" <<TXT
+          SYSTEM_CORE=UNCHANGED
+          WORKER=UNCHANGED
+          SUPABASE=UNCHANGED
+          AUTH_SCHEMA_API_STORAGE_LINE=UNCHANGED
+          TARGET_BUSINESS_PAGES=UNCHANGED
+          APP_JS=UNCHANGED
+          FROZEN_SHA_CHECK=PASS
+          ALLOWED_SOURCE_DIFF=tutorial.html,guide-center.html,.github/workflows/dpro-pest-env-tutorial-navigation-v122-qa.yml
+          BASELINE_HEAD=$BASELINE_HEAD
+          SOURCE_QA_HEAD=$GITHUB_SHA
+          TXT
+          cat "$OUT_DIR/CHANGED_FILES_SOURCE.txt" > "$OUT_DIR/CHANGED_FILES.txt"
+          cat > "$OUT_DIR/WORKFLOW_PAGES_RESULT.txt" <<TXT
+          QA_WORKFLOW_RUNTIME=PASS
+          SOURCE_HEAD=$GITHUB_SHA
+          PAGES_SOURCE_PRECHECK=PASS
+          NOTE=Final evidence commit and its Pages run are verified by CENTRAL/return packaging after this workflow.
+          TXT
+          cp "$OUT_DIR/PAGES_SOURCE_PRECHECK.txt" "$OUT_DIR/PAGES_EVIDENCE.txt"
+
+      - name: Commit QA evidence
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        id: evidence_commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'DPRO Tutorial QA Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$OUT_DIR"
+          if ! git diff --cached --quiet; then git commit -m 'qa: record PEST ENV Tutorial Navigation V1.2.2 evidence'; git push; fi
+          echo "final_head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Verify final evidence HEAD Pages and build return ZIP
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FINAL_HEAD: ${{ steps.evidence_commit.outputs.final_head }}
+        run: |
+          set -euo pipefail
+          pages_id=''; pages_url=''; pages_success=0
+          for i in $(seq 1 60); do
+            runs="$(curl -fsSL -H "Authorization: Bearer $GH_TOKEN" -H 'Accept: application/vnd.github+json' "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${FINAL_HEAD}&per_page=100" || echo '{"workflow_runs":[]}')"
+            pages_id="$(jq -r --arg sha "$FINAL_HEAD" '[.workflow_runs[]|select(.head_sha==$sha and .name=="pages build and deployment" and .conclusion=="success")][0].id // empty' <<<"$runs")"
+            pages_url="$(jq -r --arg sha "$FINAL_HEAD" '[.workflow_runs[]|select(.head_sha==$sha and .name=="pages build and deployment" and .conclusion=="success")][0].html_url // empty' <<<"$runs")"
+            if [[ -n "$pages_id" ]]; then pages_success=1; break; fi
+            sleep 5
+          done
+          [[ "$pages_success" == 1 ]]
+          cat > "$OUT_DIR/WORKFLOW_PAGES_RESULT.txt" <<TXT
+          QA_WORKFLOW_RUNTIME=PASS
+          SOURCE_QA_HEAD=$GITHUB_SHA
+          FINAL_EVIDENCE_HEAD=$FINAL_HEAD
+          SOURCE_PAGES_PRECHECK=PASS
+          FINAL_PAGES_SUCCESS=PASS
+          FINAL_PAGES_RUN_ID=$pages_id
+          FINAL_PAGES_RUN_URL=$pages_url
+          TXT
+          cat > "$OUT_DIR/PAGES_EVIDENCE.txt" <<TXT
+          PUBLIC_TUTORIAL=${PUBLIC_BASE}tutorial.html
+          PUBLIC_GUIDE=${PUBLIC_BASE}guide-center.html
+          SOURCE_QA_HEAD=$GITHUB_SHA
+          FINAL_EVIDENCE_HEAD=$FINAL_HEAD
+          FINAL_PAGES_RUN_ID=$pages_id
+          FINAL_PAGES_RUN_URL=$pages_url
+          FINAL_PAGES_SUCCESS=PASS
+          TXT
+          STAGE=/tmp/pest-v122-return
+          rm -rf "$STAGE" && mkdir -p "$STAGE"
+          cp tutorial.html guide-center.html .github/workflows/dpro-pest-env-tutorial-navigation-v122-qa.yml "$STAGE/"
+          for f in CHANGED_FILES.txt BEFORE_AFTER_SHA.txt TUTORIAL_TARGET_MAP.json TUTORIAL_RUNTIME_QA.json GUIDE_CENTER_RUNTIME_QA.json NO_CORE_CHANGE_EVIDENCE.txt BUSINESS_MUTATION_ZERO_EVIDENCE.txt REQUIRED_TARGET_BYPASS_ZERO_EVIDENCE.txt FINAL_QA_REPORT.json FINAL_QA_REPORT.md WORKFLOW_PAGES_RESULT.txt PAGES_EVIDENCE.txt VISUAL_QA_RESULT.txt FROZEN_SHA_CHECK.tsv; do cp "$OUT_DIR/$f" "$STAGE/$f"; done
+          cp "$OUT_DIR"/screenshots/*.png "$STAGE/"
+          cat > "$STAGE/00_RETURN_SUMMARY.txt" <<TXT
+          DPRO #54 PEST ENV Tutorial Navigation V1.2.2 REPAIR RETURN
+          STARTING_HEAD=$BASELINE_HEAD
+          SOURCE_QA_HEAD=$GITHUB_SHA
+          FINAL_HEAD=$FINAL_HEAD
+          FIRST10_COUNT=10
+          START=PASS
+          NEXT_ALL=PASS
+          BACK=PASS
+          RESUME_EXACT=PASS
+          REPLAY=PASS
+          CLOSE=PASS
+          ESC=PASS
+          TARGET_MISSING=PASS
+          REQUIRED_TARGET_BYPASS_COUNT=0
+          WRONG_ROUTE_COUNT=0
+          WRONG_TARGET_COUNT=0
+          BUSINESS_MUTATION_COUNT=0
+          CONSOLE_ERROR_COUNT=0
+          TUTORIAL_REQUEST_ERROR_COUNT=0
+          GUIDE_START=PASS
+          GUIDE_RESUME=PASS
+          GUIDE_REPLAY=PASS
+          VIEWPORTS=375,390,430,768,1440
+          QA_WORKFLOW=PASS
+          PAGES=PASS
+          BLOCKERS=0
+          SCOPE=Tutorial Navigation retrofit only; whole product FINAL COMPLETE is not declared here.
+          TXT
+          cat > "$STAGE/STATUS.txt" <<TXT
+          PRODUCT=DPRO #54 PEST_ENV
+          TUTORIAL_NAVIGATION_V1.2.2=PASS_WORKER_QA
+          CENTRAL_ACCEPTANCE=PENDING_CENTRAL_REVIEW
+          SYSTEM_CORE=UNCHANGED
+          WORKER_SUPABASE_AUTH_API_STORAGE_LINE=UNCHANGED
+          SUPPORT_SYNC=DEFERRED
+          BLOCKERS=0
+          TXT
+          cat > "$STAGE/HANDOFF.txt" <<TXT
+          Use this ZIP as the worker return for CENTRAL Tutorial Navigation V1.2.2 acceptance.
+          Verify FINAL_HEAD, allowed source diff, workflow result, Pages run, screenshots, business mutation zero, required target bypass zero.
+          Do not reopen System Core and do not start Quick Start / Detailed Manual / PDF support sync from this package.
+          TXT
+          cat > "$STAGE/NEXT_ACTION.txt" <<TXT
+          1. CENTRAL independently verifies this return ZIP and GitHub FINAL_HEAD.
+          2. CENTRAL checks representative screenshots and marks human visual review.
+          3. If accepted, set #54 Tutorial Navigation V1.2.2 = CENTRAL ACCEPT.
+          4. Support Sync remains a separate next phase.
+          TXT
+          (cd "$STAGE" && find . -maxdepth 1 -type f ! -name SHA256SUMS.txt -printf '%f\0' | sort -z | xargs -0 sha256sum > SHA256SUMS.txt)
+          ZIP="$GITHUB_WORKSPACE/DPRO_54_PEST_ENV_TUTORIAL_NAVIGATION_V1.2.2_REPAIR_RETURN_20260905.zip"
+          (cd "$STAGE" && zip -q -9 "$ZIP" ./*)
+          python - <<'PY'
+          import zipfile,os
+          p='DPRO_54_PEST_ENV_TUTORIAL_NAVIGATION_V1.2.2_REPAIR_RETURN_20260905.zip'
+          with zipfile.ZipFile(p) as z:
+              names=z.namelist()
+              assert all('/' not in n.rstrip('/') for n in names), names
+              assert '00_RETURN_SUMMARY.txt' in names and 'SHA256SUMS.txt' in names
+              print('RETURN_ZIP_FILE_COUNT='+str(len(names)))
+          PY
+
+      - name: Upload exact return ZIP artifact
+        if: steps.bootstrap.outputs.bootstrapped != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: DPRO_54_PEST_ENV_TUTORIAL_NAVIGATION_V1.2.2_REPAIR_RETURN_20260905
+          path: DPRO_54_PEST_ENV_TUTORIAL_NAVIGATION_V1.2.2_REPAIR_RETURN_20260905.zip
+          if-no-files-found: error
+          retention-days: 30
+

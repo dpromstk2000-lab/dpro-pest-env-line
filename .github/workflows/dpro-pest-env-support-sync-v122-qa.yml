@@ -1,0 +1,146 @@
+name: DPRO PEST ENV Support Sync V1.2.2 QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - guide-center.html
+      - quick-start-v1.2.2.html
+      - detailed-manual-v1.2.2.html
+      - DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf
+      - DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf
+      - qa/support-sync-v1.2.2/**
+      - .github/workflows/dpro-pest-env-support-sync-v122-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Frozen SHA checks
+        run: |
+          set -euo pipefail
+          test "$(git hash-object tutorial.html)" = "1b99d48a21468270a9a4cf4b7bbfde80a3c49d71"
+          test "$(git hash-object config.js)" = "c1dcb7aed06df4668856b0a524e982315e111a51"
+          test "$(git hash-object demo-core.js)" = "d603391d2e706802af959a403296fcfc60d535d3"
+          test "$(git hash-object customer-app.js)" = "dbccf84da3e45be2dc25e333c837277e2284dba1"
+          test "$(git hash-object owner-app.js)" = "8f4e7793803f2348d49e9bf8ad80b0b425c7be67"
+          test "$(git hash-object staff-app.js)" = "8436f59baa5762ff424bdfe382df66f5dd1d3430"
+          test "$(git hash-object owner-ipad-app.js)" = "2cb0117eb4eaf99d64ec1f43926f048f50c25d38"
+
+      - name: Tutorial and support content contract
+        run: |
+          set -euo pipefail
+          test "$(grep -o "id:'pest-first10-" tutorial.html | wc -l | tr -d ' ')" = "10"
+          ! grep -qi 'id="skip"' tutorial.html
+          ! grep -qi "id='skip'" tutorial.html
+          grep -q "DPRO TUTORIAL NAVIGATION V1.2.2" guide-center.html
+          grep -q "TARGET_MISSING" guide-center.html
+          grep -q "required target bypassは0" guide-center.html
+          grep -q "business mutationは0" guide-center.html
+          grep -q "DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf" guide-center.html
+          grep -q "DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf" guide-center.html
+
+      - name: PDF exact pages and A4
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq poppler-utils
+          test "$(pdfinfo DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf | awk '/^Pages:/{print $2}')" = "3"
+          test "$(pdfinfo DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf | awk '/^Pages:/{print $2}')" = "10"
+          pdfinfo DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf | grep -q "595.28 x 841.89 pts"
+          pdfinfo DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf | grep -q "595.28 x 841.89 pts"
+
+      - name: Pages propagation
+        run: |
+          set -euo pipefail
+          base="https://dpromstk2000-lab.github.io/dpro-pest-env-line"
+          ok=0
+          for i in $(seq 1 36); do
+            if curl -fsSL "$base/guide-center.html" | grep -q "Quick Start V1.2.2" \
+              && curl -fsI "$base/DPRO_PEST_ENV_QUICK_START_FINAL_V1.2.2.pdf" >/dev/null \
+              && curl -fsI "$base/DPRO_PEST_ENV_DETAILED_MANUAL_FINAL_V1.2.2.pdf" >/dev/null; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+          test "$ok" = "1"
+
+      - name: Install Playwright Chromium
+        run: |
+          set -euo pipefail
+          npm init -y >/dev/null 2>&1
+          npm install --no-save playwright@1.55.0
+          npx playwright install --with-deps chromium
+
+      - name: Live Pages target and responsive screenshots
+        env:
+          BASE_URL: https://dpromstk2000-lab.github.io/dpro-pest-env-line/
+        run: |
+          set -euo pipefail
+          mkdir -p qa-live/screens
+          cat > /tmp/dpro-live-qa.mjs <<'JS'
+          import { chromium } from 'playwright';
+          import fs from 'node:fs';
+          const base = process.env.BASE_URL;
+          const browser = await chromium.launch({headless:true});
+          const page = await browser.newPage({viewport:{width:1280,height:900}});
+          const steps = [
+            ['01-guide','guide-center.html','.hero .row'],
+            ['02-demo-prepare','demo-prepare.html?demo=1','#prepare'],
+            ['03-inquiry','inquiry.html?demo=1','#form'],
+            ['04-customer','customer.html?demo=1','#detail > h2'],
+            ['05-owner-board','owner.html?demo=1','.open'],
+            ['06-owner-next','owner.html?demo=1','#detail .grid > div:nth-child(2)'],
+            ['07-staff','staff.html?demo=1','#phase'],
+            ['08-field-map','owner-ipad.html?demo=1','#app > section.card h2'],
+            ['09-system-check','system-check.html?demo=1','#run'],
+            ['10-ready','ready-control-center.html','.hero h1']
+          ];
+          const result = {first10_exactly_10: steps.length === 10, steps: [], responsive: {}};
+          for (const [id, route, selector] of steps) {
+            await page.setViewportSize({width:1280,height:900});
+            const response = await page.goto(new URL(route,base).href,{waitUntil:'networkidle',timeout:30000});
+            if (!response || !response.ok()) throw new Error(`${id}: HTTP ${response?.status()}`);
+            const target = page.locator(selector).first();
+            await target.waitFor({state:'visible',timeout:15000});
+            await target.scrollIntoViewIfNeeded();
+            await target.evaluate(el => { el.style.outline='4px solid #e8a12e'; el.style.outlineOffset='4px'; });
+            await page.screenshot({path:`qa-live/screens/${id}.png`,fullPage:true});
+            result.steps.push({id,route,selector,http:response.status(),target_visible:true,screenshot:`screens/${id}.png`});
+          }
+          for (const width of [390,768,1440]) {
+            await page.setViewportSize({width,height:1000});
+            const response = await page.goto(new URL('guide-center.html',base).href,{waitUntil:'networkidle',timeout:30000});
+            if (!response || !response.ok()) throw new Error(`guide-${width}: HTTP ${response?.status()}`);
+            const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
+            if (overflow) throw new Error(`guide-${width}: horizontal overflow`);
+            await page.screenshot({path:`qa-live/screens/guide-${width}.png`,fullPage:true});
+            result.responsive[String(width)]={http:response.status(),horizontal_overflow:false,screenshot:`screens/guide-${width}.png`};
+          }
+          result.pass = result.first10_exactly_10 && result.steps.length === 10;
+          fs.writeFileSync('qa-live/LIVE_PAGES_QA.json',JSON.stringify(result,null,2));
+          await browser.close();
+          JS
+          node /tmp/dpro-live-qa.mjs
+
+      - name: Upload live QA artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dpro-pest-env-support-sync-v122-live-evidence
+          path: qa-live/
+          if-no-files-found: error
+
+      - name: Final workflow summary
+        run: |
+          echo "## DPRO PEST ENV Support Sync V1.2.2" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Frozen Tutorial/Core SHA: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Quick PDF: A4 portrait exactly 3 pages PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Detailed PDF: A4 portrait exactly 10 pages PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Pages propagation: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Live exact-target screenshots: PASS" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Guide responsive 390/768/1440: PASS" >> "$GITHUB_STEP_SUMMARY"

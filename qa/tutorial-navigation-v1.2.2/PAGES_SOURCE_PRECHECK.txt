@@ -1,0 +1,7 @@
+SOURCE_HEAD=c6c95ef7086e7567dbb332e666d2060505b49bae
+PUBLIC_MARKER=1
+PAGES_SUCCESS=1
+PAGES_RUN_ID=33952347215
+PAGES_RUN_URL=https://github.com/dpromstk2000-lab/dpro-pest-env-line/actions/runs/33952347215
+PUBLIC_TUTORIAL=https://dpromstk2000-lab.github.io/dpro-pest-env-line/tutorial.html
+PUBLIC_GUIDE=https://dpromstk2000-lab.github.io/dpro-pest-env-line/guide-center.html

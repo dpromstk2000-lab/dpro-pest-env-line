@@ -1,0 +1,1262 @@
+{
+  "version": "DPRO_TUTORIAL_NAVIGATION_V1.2.2",
+  "source_head": "c6c95ef7086e7567dbb332e666d2060505b49bae",
+  "all_pass": true,
+  "viewports": [
+    {
+      "viewport": {
+        "name": "mobile-375",
+        "width": 375,
+        "height": 812
+      },
+      "steps": [
+        {
+          "index": 0,
+          "step_id": "pest-first10-01-guide-safety",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 54,
+            "y": 606.375,
+            "width": 267,
+            "height": 106.375
+          },
+          "target_visible_clip": {
+            "left": 43,
+            "top": 243.703125,
+            "right": 310,
+            "bottom": 350.078125
+          }
+        },
+        {
+          "index": 1,
+          "step_id": "pest-first10-02-demo-prepare",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 38.59375,
+            "y": 432.265625,
+            "width": 184,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 27.59375,
+            "top": 320.59375,
+            "right": 211.59375,
+            "bottom": 364.59375
+          }
+        },
+        {
+          "index": 2,
+          "step_id": "pest-first10-03-web-inquiry",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 21.59375,
+            "y": -43.484375,
+            "width": 331.8125,
+            "height": 376.15625
+          },
+          "target_visible_clip": {
+            "left": 10.59375,
+            "top": 61.84375,
+            "right": 342.40625,
+            "bottom": 438
+          }
+        },
+        {
+          "index": 3,
+          "step_id": "pest-first10-04-customer",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 38.59375,
+            "y": 245.484375,
+            "width": 297.8125,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 27.59375,
+            "top": 308.8125,
+            "right": 325.40625,
+            "bottom": 346
+          }
+        },
+        {
+          "index": 4,
+          "step_id": "pest-first10-05-owner-case-board",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 260.328125,
+            "y": 371.9375,
+            "width": 54,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 249.328125,
+            "top": 144.265625,
+            "right": 303.328125,
+            "bottom": 188.265625
+          }
+        },
+        {
+          "index": 5,
+          "step_id": "pest-first10-06-owner-next-action",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 38.59375,
+            "y": 245.140625,
+            "width": 297.8125,
+            "height": 317.03125
+          },
+          "target_visible_clip": {
+            "left": 27.59375,
+            "top": 16.671875,
+            "right": 325.40625,
+            "bottom": 333.703125
+          }
+        },
+        {
+          "index": 6,
+          "step_id": "pest-first10-07-staff-field-record",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 38.59375,
+            "y": 383.890625,
+            "width": 297.8125,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 27.59375,
+            "top": 157.21875,
+            "right": 325.40625,
+            "bottom": 201.21875
+          }
+        },
+        {
+          "index": 7,
+          "step_id": "pest-first10-08-field-map-trap",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 38.59375,
+            "y": 141.390625,
+            "width": 297.8125,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 27.59375,
+            "top": 246.71875,
+            "right": 325.40625,
+            "bottom": 283.90625
+          }
+        },
+        {
+          "index": 8,
+          "step_id": "pest-first10-09-system-check",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 38.59375,
+            "y": 172.1875,
+            "width": 106,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 27.59375,
+            "top": 277.515625,
+            "right": 133.59375,
+            "bottom": 321.515625
+          }
+        },
+        {
+          "index": 9,
+          "step_id": "pest-first10-10-ready",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 38.59375,
+            "y": 143.359375,
+            "width": 297.8125,
+            "height": 72.25
+          },
+          "target_visible_clip": {
+            "left": 27.59375,
+            "top": 182.6875,
+            "right": 325.40625,
+            "bottom": 254.9375
+          }
+        }
+      ],
+      "completed": true,
+      "business_storage_unchanged": true,
+      "mutation_count": 0,
+      "request_error_count": 0,
+      "console_error_count": 0,
+      "page_error_count": 0
+    },
+    {
+      "viewport": {
+        "name": "mobile-390",
+        "width": 390,
+        "height": 844
+      },
+      "steps": [
+        {
+          "index": 0,
+          "step_id": "pest-first10-01-guide-safety",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 54,
+            "y": 603.59375,
+            "width": 282,
+            "height": 106.375
+          },
+          "target_visible_clip": {
+            "left": 43,
+            "top": 272.703125,
+            "right": 325,
+            "bottom": 379.078125
+          }
+        },
+        {
+          "index": 1,
+          "step_id": "pest-first10-02-demo-prepare",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 39.046875,
+            "y": 444.0625,
+            "width": 184,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 28.046875,
+            "top": 339.171875,
+            "right": 212.046875,
+            "bottom": 383.171875
+          }
+        },
+        {
+          "index": 2,
+          "step_id": "pest-first10-03-web-inquiry",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 22.046875,
+            "y": 28.453125,
+            "width": 345.90625,
+            "height": 388.4375
+          },
+          "target_visible_clip": {
+            "left": 11.046875,
+            "top": 67.5625,
+            "right": 356.953125,
+            "bottom": 456
+          }
+        },
+        {
+          "index": 3,
+          "step_id": "pest-first10-04-customer",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 39.046875,
+            "y": 312.875,
+            "width": 311.90625,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 28.046875,
+            "top": 312.984375,
+            "right": 339.953125,
+            "bottom": 350.171875
+          }
+        },
+        {
+          "index": 4,
+          "step_id": "pest-first10-05-owner-case-board",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 274.78125,
+            "y": 387.15625,
+            "width": 54,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 263.78125,
+            "top": 154.265625,
+            "right": 317.78125,
+            "bottom": 198.265625
+          }
+        },
+        {
+          "index": 5,
+          "step_id": "pest-first10-06-owner-next-action",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 39.046875,
+            "y": 258.5625,
+            "width": 311.90625,
+            "height": 317.03125
+          },
+          "target_visible_clip": {
+            "left": 28.046875,
+            "top": 25.875,
+            "right": 339.953125,
+            "bottom": 342.90625
+          }
+        },
+        {
+          "index": 6,
+          "step_id": "pest-first10-07-staff-field-record",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 39.046875,
+            "y": 399.484375,
+            "width": 311.90625,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 28.046875,
+            "top": 165.59375,
+            "right": 339.953125,
+            "bottom": 209.59375
+          }
+        },
+        {
+          "index": 7,
+          "step_id": "pest-first10-08-field-map-trap",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 39.046875,
+            "y": 212.78125,
+            "width": 311.90625,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 28.046875,
+            "top": 251.890625,
+            "right": 339.953125,
+            "bottom": 289.078125
+          }
+        },
+        {
+          "index": 8,
+          "step_id": "pest-first10-09-system-check",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 39.046875,
+            "y": 226.78125,
+            "width": 106,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 28.046875,
+            "top": 265.890625,
+            "right": 134.046875,
+            "bottom": 309.890625
+          }
+        },
+        {
+          "index": 9,
+          "step_id": "pest-first10-10-ready",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 39.046875,
+            "y": 175.59375,
+            "width": 311.90625,
+            "height": 75.34375
+          },
+          "target_visible_clip": {
+            "left": 28.046875,
+            "top": 190.703125,
+            "right": 339.953125,
+            "bottom": 266.046875
+          }
+        }
+      ],
+      "completed": true,
+      "business_storage_unchanged": true,
+      "mutation_count": 0,
+      "request_error_count": 0,
+      "console_error_count": 0,
+      "page_error_count": 0
+    },
+    {
+      "viewport": {
+        "name": "mobile-430",
+        "width": 430,
+        "height": 932
+      },
+      "steps": [
+        {
+          "index": 0,
+          "step_id": "pest-first10-01-guide-safety",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 54,
+            "y": 558.40625,
+            "width": 322,
+            "height": 106.375
+          },
+          "target_visible_clip": {
+            "left": 43,
+            "top": 254.703125,
+            "right": 365,
+            "bottom": 361.078125
+          }
+        },
+        {
+          "index": 1,
+          "step_id": "pest-first10-02-demo-prepare",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 40.234375,
+            "y": 445.25,
+            "width": 184,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 29.234375,
+            "top": 415.546875,
+            "right": 213.234375,
+            "bottom": 459.546875
+          }
+        },
+        {
+          "index": 2,
+          "step_id": "pest-first10-03-web-inquiry",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 23.234375,
+            "y": 83.9375,
+            "width": 383.515625,
+            "height": 442.765625
+          },
+          "target_visible_clip": {
+            "left": 12.234375,
+            "top": 60.234375,
+            "right": 395.75,
+            "bottom": 503
+          }
+        },
+        {
+          "index": 3,
+          "step_id": "pest-first10-04-customer",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 40.234375,
+            "y": 372.0625,
+            "width": 349.515625,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 29.234375,
+            "top": 295.359375,
+            "right": 378.75,
+            "bottom": 332.546875
+          }
+        },
+        {
+          "index": 4,
+          "step_id": "pest-first10-05-owner-case-board",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 375.96875,
+            "y": 453.96875,
+            "width": 43.03125,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 364.96875,
+            "top": 411.265625,
+            "right": 408,
+            "bottom": 455.265625
+          }
+        },
+        {
+          "index": 5,
+          "step_id": "pest-first10-06-owner-next-action",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 40.234375,
+            "y": 300.578125,
+            "width": 349.515625,
+            "height": 317.03125
+          },
+          "target_visible_clip": {
+            "left": 29.234375,
+            "top": 49.875,
+            "right": 378.75,
+            "bottom": 366.90625
+          }
+        },
+        {
+          "index": 6,
+          "step_id": "pest-first10-07-staff-field-record",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 40.234375,
+            "y": 442.671875,
+            "width": 349.515625,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 29.234375,
+            "top": 191.96875,
+            "right": 378.75,
+            "bottom": 235.96875
+          }
+        },
+        {
+          "index": 7,
+          "step_id": "pest-first10-08-field-map-trap",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 40.234375,
+            "y": 258.171875,
+            "width": 349.515625,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 29.234375,
+            "top": 238.46875,
+            "right": 378.75,
+            "bottom": 275.65625
+          }
+        },
+        {
+          "index": 8,
+          "step_id": "pest-first10-09-system-check",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 40.234375,
+            "y": 296.96875,
+            "width": 106,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 29.234375,
+            "top": 254.265625,
+            "right": 135.234375,
+            "bottom": 298.265625
+          }
+        },
+        {
+          "index": 9,
+          "step_id": "pest-first10-10-ready",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 40.234375,
+            "y": 286.546875,
+            "width": 349.515625,
+            "height": 83.53125
+          },
+          "target_visible_clip": {
+            "left": 29.234375,
+            "top": 209.84375,
+            "right": 378.75,
+            "bottom": 293.375
+          }
+        }
+      ],
+      "completed": true,
+      "business_storage_unchanged": true,
+      "mutation_count": 0,
+      "request_error_count": 0,
+      "console_error_count": 0,
+      "page_error_count": 0
+    },
+    {
+      "viewport": {
+        "name": "tablet-768",
+        "width": 768,
+        "height": 1024
+      },
+      "steps": [
+        {
+          "index": 0,
+          "step_id": "pest-first10-01-guide-safety",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 62,
+            "y": 563.3125,
+            "width": 644,
+            "height": 106.375
+          },
+          "target_visible_clip": {
+            "left": 43,
+            "top": 233,
+            "right": 687,
+            "bottom": 339.375
+          }
+        },
+        {
+          "index": 1,
+          "step_id": "pest-first10-02-demo-prepare",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 52.59375,
+            "y": 487.609375,
+            "width": 184,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 33.59375,
+            "top": 438.296875,
+            "right": 217.59375,
+            "bottom": 482.296875
+          }
+        },
+        {
+          "index": 2,
+          "step_id": "pest-first10-03-web-inquiry",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 33.59375,
+            "y": 254.328125,
+            "width": 700.796875,
+            "height": 543.984375
+          },
+          "target_visible_clip": {
+            "left": 14.59375,
+            "top": 29.015625,
+            "right": 715.390625,
+            "bottom": 573
+          }
+        },
+        {
+          "index": 3,
+          "step_id": "pest-first10-04-customer",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 52.59375,
+            "y": 460.609375,
+            "width": 662.796875,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 33.59375,
+            "top": 325.296875,
+            "right": 696.390625,
+            "bottom": 362.484375
+          }
+        },
+        {
+          "index": 4,
+          "step_id": "pest-first10-05-owner-case-board",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 638.171875,
+            "y": 537.84375,
+            "width": 54,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 619.171875,
+            "top": 431.53125,
+            "right": 673.171875,
+            "bottom": 475.53125
+          }
+        },
+        {
+          "index": 5,
+          "step_id": "pest-first10-06-owner-next-action",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 52.59375,
+            "y": 344.453125,
+            "width": 662.796875,
+            "height": 317.03125
+          },
+          "target_visible_clip": {
+            "left": 33.59375,
+            "top": 85.140625,
+            "right": 696.390625,
+            "bottom": 402.171875
+          }
+        },
+        {
+          "index": 6,
+          "step_id": "pest-first10-07-staff-field-record",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 52.59375,
+            "y": 551.21875,
+            "width": 662.796875,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 33.59375,
+            "top": 466.90625,
+            "right": 696.390625,
+            "bottom": 510.90625
+          }
+        },
+        {
+          "index": 7,
+          "step_id": "pest-first10-08-field-map-trap",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 52.59375,
+            "y": 354.71875,
+            "width": 662.796875,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 33.59375,
+            "top": 270.40625,
+            "right": 696.390625,
+            "bottom": 307.59375
+          }
+        },
+        {
+          "index": 8,
+          "step_id": "pest-first10-09-system-check",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 52.59375,
+            "y": 351.921875,
+            "width": 106,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 33.59375,
+            "top": 267.609375,
+            "right": 139.59375,
+            "bottom": 311.609375
+          }
+        },
+        {
+          "index": 9,
+          "step_id": "pest-first10-10-ready",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 54.59375,
+            "y": 372.53125,
+            "width": 658.796875,
+            "height": 40.953125
+          },
+          "target_visible_clip": {
+            "left": 35.59375,
+            "top": 266.21875,
+            "right": 694.390625,
+            "bottom": 307.171875
+          }
+        }
+      ],
+      "completed": true,
+      "business_storage_unchanged": true,
+      "mutation_count": 0,
+      "request_error_count": 0,
+      "console_error_count": 0,
+      "page_error_count": 0
+    },
+    {
+      "viewport": {
+        "name": "desktop-1440",
+        "width": 1440,
+        "height": 1000
+      },
+      "steps": [
+        {
+          "index": 0,
+          "step_id": "pest-first10-01-guide-safety",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 192,
+            "y": 492.46875,
+            "width": 702,
+            "height": 106.375
+          },
+          "target_visible_clip": {
+            "left": 43,
+            "top": 241.9375,
+            "right": 745,
+            "bottom": 348.3125
+          }
+        },
+        {
+          "index": 1,
+          "step_id": "pest-first10-02-demo-prepare",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 183.765625,
+            "y": 697.828125,
+            "width": 184,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 34.765625,
+            "top": 455.296875,
+            "right": 218.765625,
+            "bottom": 499.296875
+          }
+        },
+        {
+          "index": 2,
+          "step_id": "pest-first10-03-web-inquiry",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 164.765625,
+            "y": 274.546875,
+            "width": 756.46875,
+            "height": 557.984375
+          },
+          "target_visible_clip": {
+            "left": 15.765625,
+            "top": 32.015625,
+            "right": 772.234375,
+            "bottom": 590
+          }
+        },
+        {
+          "index": 3,
+          "step_id": "pest-first10-04-customer",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 183.765625,
+            "y": 570.828125,
+            "width": 718.46875,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 34.765625,
+            "top": 328.296875,
+            "right": 753.234375,
+            "bottom": 365.484375
+          }
+        },
+        {
+          "index": 4,
+          "step_id": "pest-first10-05-owner-case-board",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 817.859375,
+            "y": 675.0625,
+            "width": 54,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 668.859375,
+            "top": 432.53125,
+            "right": 722.859375,
+            "bottom": 476.53125
+          }
+        },
+        {
+          "index": 5,
+          "step_id": "pest-first10-06-owner-next-action",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 183.765625,
+            "y": 335.671875,
+            "width": 718.46875,
+            "height": 317.03125
+          },
+          "target_visible_clip": {
+            "left": 34.765625,
+            "top": 93.140625,
+            "right": 753.234375,
+            "bottom": 410.171875
+          }
+        },
+        {
+          "index": 6,
+          "step_id": "pest-first10-07-staff-field-record",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 183.765625,
+            "y": 710.4375,
+            "width": 718.46875,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 34.765625,
+            "top": 467.90625,
+            "right": 753.234375,
+            "bottom": 511.90625
+          }
+        },
+        {
+          "index": 7,
+          "step_id": "pest-first10-08-field-map-trap",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 183.765625,
+            "y": 520.9375,
+            "width": 718.46875,
+            "height": 37.1875
+          },
+          "target_visible_clip": {
+            "left": 34.765625,
+            "top": 278.40625,
+            "right": 753.234375,
+            "bottom": 315.59375
+          }
+        },
+        {
+          "index": 8,
+          "step_id": "pest-first10-09-system-check",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 183.765625,
+            "y": 517.140625,
+            "width": 106,
+            "height": 44
+          },
+          "target_visible_clip": {
+            "left": 34.765625,
+            "top": 274.609375,
+            "right": 140.765625,
+            "bottom": 318.609375
+          }
+        },
+        {
+          "index": 9,
+          "step_id": "pest-first10-10-ready",
+          "route_ok": true,
+          "target_ok": true,
+          "target_visible": true,
+          "highlight_visible": true,
+          "parent_overflow": 0,
+          "frame_overflow": 0,
+          "card_target_overlap": 0,
+          "target_projected_box": {
+            "x": 185.765625,
+            "y": 516.75,
+            "width": 714.46875,
+            "height": 40.953125
+          },
+          "target_visible_clip": {
+            "left": 36.765625,
+            "top": 274.21875,
+            "right": 751.234375,
+            "bottom": 315.171875
+          }
+        }
+      ],
+      "completed": true,
+      "business_storage_unchanged": true,
+      "mutation_count": 0,
+      "request_error_count": 0,
+      "console_error_count": 0,
+      "page_error_count": 0
+    }
+  ],
+  "features": {
+    "start": true,
+    "next_space": true,
+    "back": true,
+    "resume_exact": true,
+    "replay": true,
+    "close_preserves": true,
+    "esc_preserves": true,
+    "focus_visible": true,
+    "tab_usable": true,
+    "enter_space_usable": true,
+    "no_bad_focus_trap": true,
+    "business_storage_unchanged": true
+  },
+  "target_missing": {
+    "blocks_progress": true,
+    "japanese_error": true,
+    "retry": true,
+    "guide_recovery": true,
+    "no_silent_fallback": true,
+    "recovered_after_retry": true,
+    "required_target_bypass_count": 0
+  },
+  "business_mutation_count": 0,
+  "required_target_bypass_count": 0,
+  "wrong_route_count": 0,
+  "wrong_target_count": 0,
+  "console_error_count": 0,
+  "tutorial_request_error_count": 0,
+  "page_error_count": 0
+}

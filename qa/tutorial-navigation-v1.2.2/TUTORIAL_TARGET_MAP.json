@@ -1,0 +1,109 @@
+{
+  "version": "DPRO_TUTORIAL_NAVIGATION_V1.2.2",
+  "product_number": 54,
+  "repository": "dpromstk2000-lab/dpro-pest-env-line",
+  "source_head": "c6c95ef7086e7567dbb332e666d2060505b49bae",
+  "first10_count": 10,
+  "steps": [
+    {
+      "step_id": "pest-first10-01-guide-safety",
+      "order": 1,
+      "title": "Guide Centerと安全ルール",
+      "route": "guide-center.html",
+      "selector": ".hero .row",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-02-demo-prepare",
+      "order": 2,
+      "title": "DEMO準備画面を確認",
+      "route": "demo-prepare.html?demo=1",
+      "selector": "#prepare",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-03-web-inquiry",
+      "order": 3,
+      "title": "WEB相談受付",
+      "route": "inquiry.html?demo=1",
+      "selector": "#form",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-04-customer",
+      "order": 4,
+      "title": "Customer",
+      "route": "customer.html?demo=1",
+      "selector": "#detail > h2",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-05-owner-case-board",
+      "order": 5,
+      "title": "Owner - 案件ボード",
+      "route": "owner.html?demo=1",
+      "selector": ".open",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-06-owner-next-action",
+      "order": 6,
+      "title": "Owner - Next Actionと状態確認",
+      "route": "owner.html?demo=1",
+      "selector": "#detail .grid > div:nth-child(2)",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-07-staff-field-record",
+      "order": 7,
+      "title": "Staff - 現場カルテ",
+      "route": "staff.html?demo=1",
+      "selector": "#phase",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-08-field-map-trap",
+      "order": 8,
+      "title": "Field Map / Trap PIN",
+      "route": "owner-ipad.html?demo=1",
+      "selector": "#app > section.card h2",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-09-system-check",
+      "order": 9,
+      "title": "System Check",
+      "route": "system-check.html?demo=1",
+      "selector": "#run",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    },
+    {
+      "step_id": "pest-first10-10-ready",
+      "order": 10,
+      "title": "READYと契約後設定",
+      "route": "ready-control-center.html",
+      "selector": ".hero h1",
+      "target_required": true,
+      "automatic_action": "none",
+      "selector_verified_runtime": true
+    }
+  ]
+}

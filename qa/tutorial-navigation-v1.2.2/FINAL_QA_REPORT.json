@@ -1,0 +1,33 @@
+{
+  "product_number": 54,
+  "scope": "Tutorial Navigation V1.2.2 retrofit only",
+  "source_head": "c6c95ef7086e7567dbb332e666d2060505b49bae",
+  "first10_count": 10,
+  "start": "PASS",
+  "next_all": "PASS",
+  "back": "PASS",
+  "resume_exact": "PASS",
+  "replay": "PASS",
+  "close": "PASS",
+  "esc": "PASS",
+  "target_missing": "PASS",
+  "guide_start": "PASS",
+  "guide_resume": "PASS",
+  "guide_replay": "PASS",
+  "viewports": [
+    375,
+    390,
+    430,
+    768,
+    1440
+  ],
+  "business_mutation_count": 0,
+  "required_target_bypass_count": 0,
+  "wrong_route_count": 0,
+  "wrong_target_count": 0,
+  "console_error_count": 0,
+  "tutorial_request_error_count": 0,
+  "horizontal_overflow": 0,
+  "blockers": [],
+  "result": "PASS"
+}

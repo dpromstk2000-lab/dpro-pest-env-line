@@ -87,7 +87,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p qa-live/screens
-          cat > /tmp/dpro-live-qa.mjs <<'JS'
+          cat > dpro-live-qa.mjs <<'JS'
           import { chromium } from 'playwright';
           import fs from 'node:fs';
           const base = process.env.BASE_URL;
@@ -130,7 +130,7 @@ jobs:
           fs.writeFileSync('qa-live/LIVE_PAGES_QA.json',JSON.stringify(result,null,2));
           await browser.close();
           JS
-          node /tmp/dpro-live-qa.mjs
+          node ./dpro-live-qa.mjs
 
       - name: Upload live QA artifact
         if: always()

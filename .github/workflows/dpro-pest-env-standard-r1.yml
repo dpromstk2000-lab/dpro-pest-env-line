@@ -1,0 +1,116 @@
+name: DPRO PEST ENV STANDARD R1
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/dpro-pest-env-standard-r1.yml']
+permissions:
+  contents: write
+  pages: write
+concurrency:
+  group: pest-env-standard-r1
+  cancel-in-progress: false
+jobs:
+  repair:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install QA tools
+        run: |
+          python -m pip install beautifulsoup4 'qrcode[pil]' zxing-cpp pymupdf playwright==1.57.0
+          python -m playwright install chromium
+      - name: Patch and verify
+        run: |
+          python - <<'PYCODE'
+          from pathlib import Path
+          import re,io,base64,json,functools,threading,http.server
+          from bs4 import BeautifulSoup
+          import qrcode,fitz,zxingcpp
+          from PIL import Image
+          from playwright.sync_api import sync_playwright
+          base='https://dpromstk2000-lab.github.io/dpro-pest-env-line/'
+          urls=['https://lin.ee/YxJGXV6D','https://dpro-shop.com/',base+'demo-prepare.html?demo=1']
+          qa=Path('pest-r1-qa');qa.mkdir(exist_ok=True)
+          changed=['a4-flyer.html','DPRO_PEST_ENV_A4_FLYER_FINAL_V1.1_G8.pdf','demo-prepare.html','ui.js','index.html','product-site.html','inquiry.html','staff.html','pest-demo-r1.js']
+          p=Path('a4-flyer.html');s=p.read_text();assert 'PEST ENV A4 FLYER' in s
+          start=s.index('<div class="action-grid">');end=s.index('</section></main>',start)
+          block=BeautifulSoup(s[start:end],'html.parser');cards=block.select('.action-card');assert len(cards)==3
+          for card,url in zip(cards,urls):
+              qr=qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_M,box_size=12,border=4);qr.add_data(url);qr.make(fit=True);im=qr.make_image(fill_color='black',back_color='white').convert('RGB');assert url in {x.text for x in zxingcpp.read_barcodes(im)}
+              b=io.BytesIO();im.save(b,format='PNG');card.select_one('img')['src']='data:image/png;base64,'+base64.b64encode(b.getvalue()).decode()
+              a=card.select_one('.action-qr a');a['href']=url
+              card['class']=list(card.get('class',[]))+(['demo'] if url==urls[2] and 'demo' not in card.get('class',[]) else [])
+              # Make the whole card a real link, not nested links.
+              a.unwrap();card.name='a';card['href']=url;card['target']='_blank';card['rel']='noopener'
+          site=cards[1];site.select_one('.action-note').string='OFFICIAL WEB ADDRESS / PCから直接アクセス';site.select_one('.site-url').string=urls[1]
+          s=s[:start]+str(block)+s[end:]
+          css='''<style id="pest-flyer-r1">.main{gap:1.7mm;padding-top:3.5mm}.feature{min-height:21mm;padding:1.8mm 2.8mm}.feature p{font-size:2.25mm}.ecosystem{padding:2.3mm 3.3mm}.strength-grid{margin-top:1.5mm;padding-top:1.3mm}.cost-check{padding:2mm 3mm}.price{padding:2.3mm 3.5mm}.contact{padding-top:1.3mm}.contact-head{margin-bottom:1.3mm}.action-grid{grid-template-columns:1fr 1.12fr 1fr;align-items:stretch;gap:1.8mm}.action-card{min-height:36mm;grid-template-columns:minmax(0,1fr) 20.5mm;gap:1.2mm;padding:1.8mm;text-decoration:none;color:inherit;min-width:0}.action-card.demo{grid-template-columns:minmax(0,1fr) 24mm;gap:1mm}.action-card p{font-size:1.8mm}.action-qr img{width:20.5mm;height:20.5mm;max-width:none;background:#fff}.action-card.demo img{width:24mm;height:24mm}.action-card.site{background:linear-gradient(135deg,#f1fcf7,#fff)}.action-card.site .action-note{font-size:1.45mm;letter-spacing:0;padding-top:1mm}.site-url{font-size:3.5mm;line-height:1.1;text-align:center;margin:0;padding:.8mm;white-space:nowrap}.action-note{overflow-wrap:anywhere}.action-card h4{white-space:normal}.footer{margin-top:auto}@media screen and (max-width:820px){.sheet-wrap{position:relative;padding:0;overflow:hidden;margin:8px auto}.sheet-wrap .sheet{margin:0;position:absolute;left:0;top:0;transform-origin:top left;transform:scale(var(--pest-fit,1))}.toolbar{flex-wrap:wrap}}@media print{.sheet-wrap{width:210mm!important;height:297mm!important;position:static!important}.sheet{position:relative!important}}</style>'''
+          if 'id="pest-flyer-r1"' not in s:s=s.replace('</head>',css+'</head>',1)
+          fit='''<script id="pest-fit-r1">(()=>{const w=document.querySelector('.sheet-wrap'),s=document.querySelector('.sheet');function fit(){if(innerWidth<=820){const z=Math.min(1,(innerWidth-12)/s.offsetWidth);w.style.width=s.offsetWidth*z+'px';w.style.height=s.offsetHeight*z+'px';w.style.setProperty('--pest-fit',z)}else{w.style.width='';w.style.height='';w.style.removeProperty('--pest-fit')}}fit();addEventListener('resize',fit)})();</script>'''
+          if 'id="pest-fit-r1"' not in s:s=s.replace('</body>',fit+'</body>',1)
+          s=s.replace('MASTER V3.0','MASTER V3.1');p.write_text(s)
+          roles=[('inquiry.html?demo=1','WEB相談受付','症状・場所・相談フォーム'),('customer.html?demo=1','お客様マイページ','本人案件・相談履歴・次回予定'),('owner.html?demo=1','管理者PC','案件・報告承認・次回点検'),('staff.html?demo=1','現場スタッフ','担当案件・現調・施工・安全確認'),('owner-ipad.html?demo=1','現場iPad','物件・区画・トラップ地点')]
+          links=''.join(f'<a class="card role" href="{u}"><h2>{n}</h2><p>{d}</p><b>操作画面を開く →</b></a>' for u,n,d in roles)
+          nav=''.join(f'<a href="{u}">{n}</a>' for u,n,d in roles)
+          Path('demo-prepare.html').write_text('''<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DPRO PEST ENV | 公開操作DEMO</title><link rel="stylesheet" href="styles.css"><style>.role{display:block;text-decoration:none;color:#173e2a;min-height:130px}.role:hover,.role:focus-visible{outline:2px solid #17643b}.role h2{font-size:1.2rem}.role b{color:#17643b}.rolegrid{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}</style></head><body><header class="topbar"><div class="brand">DPRO ペストコントロール／環境衛生サービス</div><a href="product-site.html">製品紹介</a></header><div class="demo-banner">公開DEMO — 架空データ専用・本番送信なし</div><main class="container"><section class="hero"><span class="badge">LIVE DEMO</span><h1>防除・環境衛生の業務を体験する</h1><p>登録やLINE認証は不要です。住宅の相談と飲食店の定期防除を、役割別に確認できます。実在する氏名・住所・写真・薬剤記録は入力しないでください。</p></section><section class="grid rolegrid" style="margin-top:18px">'''+links+'''</section><section class="card" style="margin-top:18px"><h2>操作ガイド・デモデータ</h2><div class="row"><a class="btn secondary" href="guide-center.html?demo=1">操作ガイド</a><a class="btn secondary" href="tutorial.html?mode=start&amp;demo=1">最初の10ステップ</a><a class="btn secondary" href="system-check.html?demo=1">システムチェック</a><button class="btn secondary" id="prepare" type="button">デモデータを初期化・生成</button></div><p id="msg" role="status">初期化はこのブラウザの架空データだけに適用されます。</p></section></main><script src="demo-core.js"></script><script>document.getElementById('prepare').onclick=()=>{if(!confirm('このブラウザ内のデモデータを初期状態に戻しますか？'))return;const s=DproDemo.reset();document.getElementById('msg').textContent=`準備完了：案件 ${s.cases.length}件 / トラップ ${s.traps.length}地点 / 本番書込 0件`;};</script></body></html>''')
+          p=Path('ui.js');s=p.read_text();old="function nav(){const d=demo?'?demo=1':'';";new="function nav(){if(demo)return `<div class=\"nav\"><a href=\"demo-prepare.html?demo=1\">DEMO一覧</a>"+nav+"<a href=\"guide-center.html?demo=1\">操作ガイド</a><a href=\"system-check.html?demo=1\">システムチェック</a></div>`;const d=demo?'?demo=1':'';";assert old in s or new in s;s=s.replace(old,new,1) if old in s else s
+          old="async function api(path,opts={},retried=false){if(!base())";new="async function api(path,opts={},retried=false){if(demo)throw new Error('DEMO_NETWORK_BLOCKED');if(!base())";assert old in s or new in s;s=s.replace(old,new,1) if old in s else s;p.write_text(s)
+          # Only demo-mode entry links on index. The production DOM remains unchanged.
+          p=Path('index.html');s=p.read_text();script='''<script id="pest-index-r1">if(new URLSearchParams(location.search).get('demo')==='1'){document.querySelectorAll('a[href="inquiry.html"],a[href="owner.html"],a[href="staff.html"],a[href="customer.html"],a[href="owner-ipad.html"]').forEach(a=>{a.href=a.getAttribute('href')+'?demo=1'});}</script>''';s=s if 'pest-index-r1' in s else s.replace('</body>',script+'</body>',1);p.write_text(s)
+          p=Path('product-site.html');s=p.read_text();s=s.replace('href="inquiry.html"','href="inquiry.html?demo=1"');p.write_text(s)
+          p=Path('inquiry.html');s=p.read_text();script='''<script id="pest-inquiry-r1">if(new URLSearchParams(location.search).get('demo')==='1'){const bar=document.querySelector('.topbar');const a=document.createElement('a');a.href='demo-prepare.html?demo=1';a.textContent='DEMO一覧';bar.appendChild(a);const n=document.createElement('div');n.className='demo-banner';n.textContent='架空データ専用・本番送信なし';bar.after(n);document.querySelector('[name=customer_name]').value='デモ顧客';document.querySelector('[name=contact]').value='090-0000-0000';document.querySelector('[name=symptom]').value='厨房の点検を相談したいです（架空）';}</script>''';s=s if 'pest-inquiry-r1' in s else s.replace('</body>',script+'</body>',1);p.write_text(s)
+          p=Path('staff.html');s=p.read_text();tag='<script src="pest-demo-r1.js"></script>';s=s if tag in s else s.replace('</body>',tag+'</body>',1);p.write_text(s)
+          Path('pest-demo-r1.js').write_text('''(()=>{'use strict';if(!window.DPRO_UI?.demo)return;document.addEventListener('click',e=>{const btn=e.target.closest('#inspection,#treatment');if(!btn)return;const id=new URLSearchParams(location.search).get('staff')==='a'?'case-home':'case-shop';const uid=id==='case-home'?'u-staff-a':'u-staff-b';const inspection=btn.id==='inspection';const input=document.getElementById(inspection?'findings':'treatment-detail');const message=document.getElementById('msg');try{const v=input.value.trim();if(!v){message.textContent='架空の記録内容を入力してください。';return}const state=DproDemo.load();DproDemo.addEvidence(state,uid,id,{phase:inspection?'survey':'during',kind:'note',caption:v});DproDemo.save(state);message.textContent=inspection?'現調記録を端末内に保存しました。':'施工記録を端末内に保存しました。';const item=document.createElement('div');item.className='event';item.textContent=(inspection?'現調':'施工')+' — '+v;document.querySelector('#detail .timeline')?.appendChild(item);}catch(err){message.textContent='保存できません: '+err.message}})})();''')
+          # Test with all external traffic blocked.
+          server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(http.server.SimpleHTTPRequestHandler,directory=str(Path.cwd())))
+          threading.Thread(target=server.serve_forever,daemon=True).start();local=f'http://127.0.0.1:{server.server_port}/';external=[];checks=[]
+          def dec(path):return {x.text for x in zxingcpp.read_barcodes(Image.open(path))}
+          with sync_playwright() as pw:
+           b=pw.chromium.launch(args=['--no-sandbox']);ctx=b.new_context(viewport={'width':1440,'height':1400},device_scale_factor=2)
+           def guard(r):
+            if r.request.url.startswith(local):r.continue_()
+            else:external.append(r.request.url);r.abort()
+           ctx.route('**/*',guard);p=ctx.new_page();p.goto(local+'a4-flyer.html');p.locator('#print:not([disabled])').wait_for();p.evaluate('document.fonts.ready');p.wait_for_load_state('networkidle')
+           def layout():
+            d=p.evaluate('''()=>{const rect=e=>e.getBoundingClientRect(),grid=rect(document.querySelector('.action-grid')),foot=rect(document.querySelector('.footer')),u=document.querySelector('.site-url'),r=rect(u),a=rect(u.closest('.action-card'));return {footer_clear:grid.bottom<=foot.top+1,url_inside:r.left>=a.left&&r.right<=a.right+1&&r.bottom<=a.bottom+1,url_fits:u.scrollWidth<=u.clientWidth+1,all_qrs:[...document.querySelectorAll('.action-qr img')].every(i=>i.complete&&i.naturalWidth>0&&rect(i).right<=rect(i.closest('.action-card')).right+1),photo_loaded:document.querySelector('#hero-photo').naturalWidth>0}}''');assert all(d.values()),d;return d
+           screen=layout();p.locator('.sheet').screenshot(path=str(qa/'screen.png'));assert set(urls)<=dec(qa/'screen.png')
+           p.emulate_media(media='print');printed=layout();pdf='DPRO_PEST_ENV_A4_FLYER_FINAL_V1.1_G8.pdf';p.pdf(path=pdf,prefer_css_page_size=True,print_background=True);p.emulate_media(media='screen');p.set_viewport_size({'width':390,'height':844});p.wait_for_timeout(150);mobile=layout();p.close()
+           for width in [390,1440]:
+            for url,_,_ in roles+[('demo-prepare.html?demo=1','DEMO','')]:
+             p=ctx.new_page();p.set_viewport_size({'width':width,'height':1000});p.goto(local+url);p.wait_for_load_state('networkidle');assert p.locator('h1,h2').count()>0 and p.locator('body').inner_text().strip();assert p.locator('#login-form').count()==0;checks.append([url,width,'PASS']);p.close()
+           p=ctx.new_page();p.goto(local+'index.html?demo=1');assert p.locator('a[href="inquiry.html?demo=1"]').count()>0
+           p.goto(local+'inquiry.html?demo=1');p.locator('input[type=checkbox]').check();p.locator('#submit').click();p.get_by_text('DEMO受付完了（本番送信なし）').wait_for();checks.append(['inquiry demo no send','PASS'])
+           p.goto(local+'staff.html?demo=1');p.locator('#findings').fill('架空の現調記録');p.locator('#inspection').click();p.get_by_text('現調記録を端末内に保存しました。').wait_for();p.locator('#treatment-detail').fill('架空の施工記録');p.locator('#treatment').click();p.get_by_text('施工記録を端末内に保存しました。').wait_for();p.reload();p.get_by_text('架空の現調記録',exact=True).wait_for();p.get_by_text('架空の施工記録',exact=True).wait_for();checks.append(['staff survey and treatment persisted','PASS'])
+           p.goto(local+'owner.html?demo=1');p.locator('.open[data-id="case-shop"]').click();p.get_by_text('survey — 架空の現調記録',exact=True).wait_for();checks.append(['owner sees demo staff evidence','PASS'])
+           for url in ['owner.html','staff.html','customer.html','owner-ipad.html']:
+            p.goto(local+url);p.locator('#login-form').wait_for();checks.append([url,'production login retained','PASS'])
+           assert not external,external;b.close()
+          with fitz.open(pdf) as d:
+           assert len(d)==1 and abs(d[0].rect.width-595.28)<3 and abs(d[0].rect.height-841.89)<3;d[0].get_pixmap(matrix=fitz.Matrix(3,3),alpha=False).save(qa/'print.png');assert 'https://dpro-shop.com/' in d[0].get_text()
+          assert set(urls)<=dec(qa/'print.png');server.shutdown();result={'screen_layout':screen,'print_layout':printed,'mobile_layout':mobile,'screen_qr':sorted(dec(qa/'screen.png')),'print_qr':sorted(dec(qa/'print.png')),'a4_pages':1,'checks':checks,'external_requests':external,'production_mutations':0};(qa/'RESULT.json').write_text(json.dumps(result,ensure_ascii=False,indent=2));print(json.dumps(result,ensure_ascii=False))
+          PYCODE
+          node --check ui.js
+          node --check pest-demo-r1.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: DPRO-PEST-ENV-R1-QA
+          path: pest-r1-qa/
+          if-no-files-found: warn
+      - name: Commit verified files only
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- a4-flyer.html DPRO_PEST_ENV_A4_FLYER_FINAL_V1.1_G8.pdf demo-prepare.html ui.js index.html product-site.html inquiry.html staff.html pest-demo-r1.js
+          if ! git diff --cached --quiet; then git commit -m 'DPRO PEST ENV STANDARD R1'; git push origin HEAD:main; fi
+      - name: Request Pages build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          curl -fsSL -X POST -H 'Accept: application/vnd.github+json' -H "Authorization: Bearer $GH_TOKEN" "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/pages/builds"
